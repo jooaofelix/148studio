@@ -1,0 +1,997 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>148 Estúdio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bebas+Neue&family=Bungee&family=Inter:wght@400;600;800&family=Monoton&family=Permanent+Marker&family=Pirata+One&family=Playfair+Display:ital,wght@0,700;1,700&family=Rubik+Mono+One&family=Space+Grotesk:wght@500;700&family=UnifrakturCook:wght@700&family=Unbounded:wght@800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fundo: #0d0d0f; --painel: #16161a; --painel2: #1d1d23; --borda: #2a2a33;
+    --texto: #eeeef2; --suave: #8d8d9a; --destaque: #e8ff3a; --perigo: #ff4d5e;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--fundo); color: var(--texto); font: 13px/1.4 Inter, system-ui, sans-serif; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { background: var(--painel2); border: 1px solid var(--borda); border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+  button:hover { border-color: #4a4a58; background: #24242c; }
+  button.primario { background: var(--destaque); color: #0d0d0f; border-color: var(--destaque); font-weight: 800; }
+  button.primario:hover { filter: brightness(1.08); }
+  button.perigo { color: var(--perigo); }
+  button.ativo { border-color: var(--destaque); color: var(--destaque); }
+  input[type=text], input[type=number], select, textarea { width: 100%; background: #0f0f13; border: 1px solid var(--borda); border-radius: 7px; padding: 6px 8px; }
+  textarea { resize: vertical; min-height: 54px; }
+  input[type=color] { width: 34px; height: 30px; padding: 0; border: 1px solid var(--borda); border-radius: 7px; background: none; cursor: pointer; }
+  input[type=range] { width: 100%; accent-color: var(--destaque); }
+  label { display: block; color: var(--suave); font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; margin: 10px 0 4px; }
+
+  #app { display: grid; grid-template-columns: 250px 1fr 300px; grid-template-rows: 54px 1fr; height: 100vh; }
+  header { grid-column: 1 / 4; display: flex; align-items: center; gap: 10px; padding: 0 14px; border-bottom: 1px solid var(--borda); background: var(--painel); }
+  .logo { font: 800 20px Unbounded, Inter, sans-serif; letter-spacing: -.02em; }
+  .logo span { color: var(--destaque); }
+  header .espaco { flex: 1; }
+  .grupo { display: flex; gap: 6px; }
+  #cores { color: var(--suave); font-size: 12px; padding: 6px 10px; border: 1px solid var(--borda); border-radius: 8px; white-space: nowrap; }
+  #cores b { color: var(--texto); }
+
+  aside { background: var(--painel); border-right: 1px solid var(--borda); padding: 12px; overflow-y: auto; }
+  aside.direita { border-right: 0; border-left: 1px solid var(--borda); }
+  h3 { margin: 16px 0 8px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--suave); }
+  h3:first-child { margin-top: 0; }
+  .grade2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .grade3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .grade3 button, .grade2 button { padding: 7px 4px; }
+  .modelo { height: 64px; display: grid; place-items: center; text-align: center; font-size: 11px; padding: 4px; background: #101014; }
+  .modelo b { display: block; font-size: 18px; line-height: 1; margin-bottom: 4px; }
+  .efeito { font-size: 12px; font-weight: 700; }
+  .cores { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cor { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--borda); cursor: pointer; padding: 0; }
+  .cor.ativo { border-color: var(--destaque); box-shadow: 0 0 0 2px #0d0d0f inset; }
+  .paleta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .chip { width: 24px; height: 24px; border-radius: 6px; border: 1px solid #444; cursor: pointer; }
+
+  main { position: relative; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 40%, #202027 0%, #0d0d0f 70%); }
+  #palco { position: relative; width: min(620px, 92%); aspect-ratio: 1000 / 1100; }
+  #camisa { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 30px 40px rgba(0,0,0,.55)); }
+  #arte { position: absolute; touch-action: none; }
+  #areaGuia { position: absolute; border: 1px dashed rgba(232,255,58,.35); pointer-events: none; }
+  .vista { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
+  .dicaPalco { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); color: var(--suave); font-size: 12px; white-space: nowrap; }
+
+  .camada { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--borda); border-radius: 8px; margin-bottom: 5px; cursor: pointer; background: #111115; }
+  .camada.sel { border-color: var(--destaque); }
+  .camada .nome { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .camada button { padding: 2px 6px; font-size: 11px; }
+  .vazio { color: var(--suave); font-size: 12px; }
+  .linha { display: flex; gap: 6px; align-items: center; }
+  .linha > * { flex: 1; }
+  .linha > input[type=color] { flex: 0 0 34px; }
+  .valor { color: var(--texto); font-weight: 700; float: right; text-transform: none; letter-spacing: 0; }
+  .secao { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--borda); }
+  .secao > .titulo { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--destaque); }
+  #aviso { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid var(--borda); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: .2s; pointer-events: none; z-index: 9; }
+  #aviso.on { opacity: 1; }
+  .check { display: flex; align-items: center; gap: 8px; color: var(--texto); text-transform: none; font-size: 13px; letter-spacing: 0; font-weight: 500; }
+  .check input { width: auto; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">148<span>.</span>estúdio</div>
+    <div class="grupo">
+      <button id="desfazer" title="Desfazer (Ctrl+Z)">↶ Desfazer</button>
+      <button id="refazer" title="Refazer (Ctrl+Shift+Z)">↷</button>
+    </div>
+    <div id="cores" title="Cores sólidas na estampa desta vista: cada uma é uma tela na serigrafia">🎨 —</div>
+    <div class="espaco"></div>
+    <div class="grupo">
+      <button id="novo">Novo</button>
+      <button id="abrir">Abrir projeto</button>
+      <button id="salvar">Salvar projeto</button>
+      <button id="exportarMockup">Baixar mockup</button>
+      <button id="exportarArte" class="primario" title="PNG transparente 3600×4800 (30×40 cm a 300 dpi)">Baixar arte para impressão</button>
+    </div>
+    <input id="arquivoProjeto" type="file" accept=".json,application/json" hidden>
+    <input id="arquivoImagem" type="file" accept="image/*" hidden>
+    <input id="arquivoLogo" type="file" accept="image/*" hidden>
+  </header>
+
+  <aside>
+    <h3>Adicionar</h3>
+    <div class="grade2">
+      <button id="addTexto">＋ Texto</button>
+      <button id="addImagem">＋ Imagem</button>
+      <button id="addCirculo">◯ Círculo</button>
+      <button id="addRetangulo">▭ Retângulo</button>
+      <button id="addEstrela">★ Estrela</button>
+      <button id="addLinha">— Linha</button>
+    </div>
+
+    <h3>Modelos 148</h3>
+    <div class="grade2" id="modelos"></div>
+
+    <h3>Kit da marca</h3>
+    <label>Nome da marca</label>
+    <input id="marcaNome" type="text">
+    <label>Frase / slogan</label>
+    <input id="marcaFrase" type="text">
+    <label>Ano</label>
+    <input id="marcaAno" type="text">
+    <label>Paleta (clique pinta a camada · botão direito remove)</label>
+    <div class="paleta" id="paleta"></div>
+    <label>Logo</label>
+    <div class="linha">
+      <button id="enviarLogo">Enviar logo</button>
+      <button id="usarLogo">Usar logo</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="vista">
+      <button id="vistaFrente" class="ativo">Frente</button>
+      <button id="vistaCostas">Costas</button>
+    </div>
+    <div id="palco">
+      <svg id="camisa" viewBox="0 0 1000 1100" aria-hidden="true"></svg>
+      <div id="areaGuia"></div>
+      <canvas id="arte"></canvas>
+    </div>
+    <div class="dicaPalco">Arraste para mover · alça ■ redimensiona · alça ● gira (Shift: de 15 em 15°) · Delete apaga · Ctrl+D duplica · setas ajustam</div>
+  </main>
+
+  <aside class="direita">
+    <h3>Camiseta</h3>
+    <div class="cores" id="coresCamisa"></div>
+    <label class="check" style="margin-top:10px"><input type="checkbox" id="mostrarGuia" checked> Mostrar área de impressão</label>
+
+    <h3>Camadas</h3>
+    <div id="camadas"></div>
+
+    <h3>Propriedades</h3>
+    <div id="props"><p class="vazio">Selecione uma camada para editar.</p></div>
+  </aside>
+</div>
+<div id="aviso"></div>
+
+<script>
+'use strict'
+// ── constantes ───────────────────────────────────────────────────────────
+const PW = 3600, PH = 4800 // área de impressão: 30 × 40 cm a 300 dpi
+const AREA = { frente: { x: 330, y: 255, l: 340, a: 453 }, costas: { x: 330, y: 215, l: 340, a: 453 } } // no viewBox da camisa
+const CORES_CAMISA = [
+  ['Preta', '#111113'], ['Branca', '#f4f4f2'], ['Off-white', '#ebe4d6'], ['Cinza mescla', '#9a9ca3'],
+  ['Grafite', '#3a3b40'], ['Verde musgo', '#4a5236'], ['Marrom', '#5b4030'], ['Azul marinho', '#1c2438'],
+]
+const FONTES = ['Anton', 'Bebas Neue', 'Archivo Black', 'Rubik Mono One', 'Bungee', 'Unbounded', 'UnifrakturCook', 'Pirata One', 'Permanent Marker', 'Monoton', 'Playfair Display', 'Space Grotesk', 'Inter']
+const MISTURAS = [['source-over', 'Normal'], ['multiply', 'Multiplicar'], ['screen', 'Tela'], ['overlay', 'Sobrepor'], ['difference', 'Diferença'], ['color-dodge', 'Subexposição']]
+const FORMAS_TEXTO = [['reto', 'Reto'], ['arco', 'Arco'], ['circulo', 'Círculo'], ['onda', 'Onda']]
+const CHAVE = '148-estudio-v1'
+
+// ── estado ──────────────────────────────────────────────────────────────
+let estado = migrar(carregarLocal()) ?? estadoInicial()
+let vista = 'frente'
+let selecionada = null
+let guias = []
+const historico = [], refeito = []
+const imagens = new Map() // src → HTMLImageElement
+
+function estadoInicial() {
+  return {
+    corCamisa: '#111113',
+    marca: { nome: '148', frase: 'ORIGINAL DA RUA', ano: '2024', paleta: ['#ffffff', '#111113', '#e8ff3a', '#d7263d', '#ebe4d6'], logo: null },
+    camadas: { frente: [], costas: [] },
+  }
+}
+function migrar(e) {
+  if (!e) return null
+  for (const lista of Object.values(e.camadas)) for (const c of lista) if (c.tipo === 'texto') Object.assign(c, { ...padraoTexto(), ...c, modo: c.modo ?? (c.curva ? 'arco' : 'reto') })
+  return e
+}
+
+const uid = () => Math.random().toString(36).slice(2, 9)
+const camadas = () => estado.camadas[vista]
+const camadaSel = () => camadas().find(c => c.id === selecionada) ?? null
+
+function salvarHistorico() {
+  historico.push(JSON.stringify(estado))
+  if (historico.length > 60) historico.shift()
+  refeito.length = 0
+}
+let avisouCheio = false
+function persistir() {
+  try { localStorage.setItem(CHAVE, JSON.stringify(estado)) }
+  catch { if (!avisouCheio) { avisouCheio = true; aviso('Projeto grande demais para o salvamento automático: use “Salvar projeto”.') } }
+}
+function carregarLocal() { try { return JSON.parse(localStorage.getItem(CHAVE)) } catch { return null } }
+function mudou(comHistorico = true) { if (comHistorico) salvarHistorico(); persistir(); desenhar(); montarCamadas(); montarProps(); contarCores() }
+
+// ── camadas ─────────────────────────────────────────────────────────────
+function padraoTexto() {
+  return { modo: 'reto', fonte: 'Anton', tamanho: 700, peso: 400, espacamento: 0, altura: 1, curva: 0, raio: 1100, embaixo: false, amplitude: 160, frequencia: 1,
+    cor: '#ffffff', cor2: '#e8ff3a', degrade: false, preencherTexto: true,
+    contorno: 0, contornoCor: '#000000', contorno2: 0, contorno2Cor: '#e8ff3a',
+    sombra: 0, sombraCor: '#000000', extrusao: 0, brilho: 0, italico: false }
+}
+function base() { return { id: uid(), x: PW / 2, y: PH / 2, rot: 0, escala: 1, opacidade: 1, desgaste: 0, mistura: 'source-over' } }
+function novoTexto(o = {}) {
+  return { ...base(), tipo: 'texto', nome: 'Texto', texto: estado.marca.nome, ...padraoTexto(), cor: estado.marca.paleta[0], ...o }
+}
+function novaForma(forma, o = {}) {
+  const c = { ...base(), tipo: 'forma', forma, nome: { circulo: 'Círculo', retangulo: 'Retângulo', estrela: 'Estrela', linha: 'Linha', anel: 'Anel' }[forma],
+    l: 1400, a: 1400, cor: estado.marca.paleta[0], contorno: 0, contornoCor: '#000000', preencher: true, raioCanto: 0 }
+  if (forma === 'linha') Object.assign(c, { l: 2400, a: 40 })
+  if (forma === 'anel') Object.assign(c, { preencher: false, contorno: 70, contornoCor: estado.marca.paleta[0] })
+  return { ...c, ...o }
+}
+function novaImagem(src, l, a, o = {}) {
+  const k = Math.min(2400 / l, 2400 / a)
+  return { ...base(), tipo: 'imagem', nome: 'Imagem', src, srcOriginal: src, l: l * k, a: a * k, tinta: estado.marca.paleta[0], limiar: 0.85, ...o }
+}
+function adicionar(c) { salvarHistorico(); camadas().push(c); selecionada = c.id; mudou(false) }
+
+// ── texto: onde cada letra fica ─────────────────────────────────────────
+const medidor = document.createElement('canvas').getContext('2d')
+function fonteCss(c) { return `${c.italico ? 'italic ' : ''}${c.peso} ${c.tamanho}px "${c.fonte}"` }
+function larguraDe(g, texto, c) {
+  let w = 0
+  for (const ch of texto) w += g.measureText(ch).width + c.espacamento
+  return Math.max(0, w - c.espacamento)
+}
+
+/** Lista de { ch, x, y, rot } no espaço da camada, para qualquer forma de texto. */
+function letras(g, c) {
+  g.font = fonteCss(c)
+  const saida = []
+  if (c.modo === 'reto') {
+    const ls = String(c.texto).split('\n')
+    const passo = c.tamanho * c.altura
+    ls.forEach((linha, k) => {
+      let x = -larguraDe(g, linha, c) / 2
+      const y = -((ls.length - 1) * passo) / 2 + k * passo
+      for (const ch of linha) { const w = g.measureText(ch).width; saida.push({ ch, x: x + w / 2, y, rot: 0, w }); x += w + c.espacamento }
+    })
+    return saida
+  }
+  const linha = String(c.texto).replace(/\n/g, ' ')
+  const total = larguraDe(g, linha, c)
+  if (c.modo === 'onda') {
+    let x = -total / 2
+    for (const ch of linha) {
+      const w = g.measureText(ch).width
+      const t = (x + w / 2) / Math.max(1, total) * Math.PI * 2 * c.frequencia
+      saida.push({ ch, x: x + w / 2, y: Math.sin(t) * c.amplitude, rot: Math.cos(t) * c.amplitude / Math.max(1, total) * Math.PI * 2 * c.frequencia * 0.6, w })
+      x += w + c.espacamento
+    }
+    return saida
+  }
+  // arco (curvatura em graus) ou círculo (raio fixo, centro na posição da camada)
+  let r, cy, sentido
+  if (c.modo === 'circulo') { r = Math.max(50, c.raio); cy = 0; sentido = c.embaixo ? -1 : 1 }
+  else {
+    const ang = (c.curva || 0.0001) * Math.PI / 180
+    r = total / Math.abs(ang); sentido = Math.sign(ang); cy = sentido * r
+  }
+  const abertura = total / r
+  let a = -abertura / 2
+  for (const ch of linha) {
+    const w = g.measureText(ch).width
+    const meio = a + (w / 2) / r
+    const ang = sentido > 0 ? meio : -meio
+    // em cima: letras sobre o círculo, viradas para fora; embaixo: lidas da esquerda para a direita
+    const x = Math.sin(ang) * r * sentido
+    const y = cy - Math.cos(ang) * r * sentido
+    saida.push({ ch, x, y, rot: ang, w })
+    a += (w + c.espacamento) / r
+  }
+  return saida
+}
+
+function caixaLocal(c) {
+  if (c.tipo === 'texto') {
+    const ls = letras(medidor, c)
+    if (!ls.length) return { x0: -50, y0: -50, x1: 50, y1: 50 }
+    const folga = c.contorno + c.contorno2 + c.extrusao + c.brilho + c.tamanho * 0.12
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
+    for (const l of ls) {
+      const meio = Math.max(l.w, c.tamanho * 0.6) / 2
+      x0 = Math.min(x0, l.x - meio); x1 = Math.max(x1, l.x + meio)
+      y0 = Math.min(y0, l.y - c.tamanho / 2); y1 = Math.max(y1, l.y + c.tamanho / 2)
+    }
+    return { x0: x0 - folga * 0.5, y0: y0 - folga * 0.5, x1: x1 + folga + c.sombra, y1: y1 + folga + c.sombra }
+  }
+  const m = (c.contorno ?? 0) / 2
+  return { x0: -c.l / 2 - m, y0: -c.a / 2 - m, x1: c.l / 2 + m, y1: c.a / 2 + m }
+}
+
+// ── desenho ─────────────────────────────────────────────────────────────
+const canvas = document.getElementById('arte')
+const ctx = canvas.getContext('2d')
+const texturaDesgaste = criarTextura()
+
+function criarTextura() {
+  const t = document.createElement('canvas'); t.width = t.height = 900
+  const g = t.getContext('2d')
+  let s = 148
+  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647
+  for (let i = 0; i < 5200; i++) {
+    g.globalAlpha = 0.25 + rnd() * 0.75
+    g.beginPath(); g.arc(rnd() * 900, rnd() * 900, rnd() < 0.85 ? rnd() * 3 + 0.4 : rnd() * 9 + 3, 0, Math.PI * 2); g.fill()
+  }
+  g.lineCap = 'round'
+  for (let i = 0; i < 70; i++) {
+    g.globalAlpha = 0.5 + rnd() * 0.5; g.lineWidth = rnd() * 2.5 + 0.5
+    const x = rnd() * 900, y = rnd() * 900, ang = rnd() * Math.PI, len = 20 + rnd() * 80
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(ang) * len, y + Math.sin(ang) * len); g.stroke()
+  }
+  return t
+}
+
+function desenharTexto(g, c) {
+  const ls = letras(g, c)
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.miterLimit = 2
+  const cada = (dx, dy, fn) => { for (const l of ls) { g.save(); g.translate(l.x + dx, l.y + dy); g.rotate(l.rot); fn(l.ch); g.restore() } }
+  // 1. sombra 3D (extrusão): o texto repetido na diagonal, na cor da sombra
+  if (c.extrusao > 0) {
+    const passo = Math.max(3, c.tamanho / 60)
+    g.fillStyle = c.sombraCor; g.strokeStyle = c.sombraCor; g.lineWidth = (c.contorno + c.contorno2) * 2
+    for (let d = c.extrusao; d > 0; d -= passo) cada(d, d, ch => { if (g.lineWidth) g.strokeText(ch, 0, 0); g.fillText(ch, 0, 0) })
+  }
+  // 2. sombra deslocada (chapada)
+  if (c.sombra > 0) {
+    g.fillStyle = c.sombraCor; g.strokeStyle = c.sombraCor; g.lineWidth = (c.contorno + c.contorno2) * 2
+    cada(c.sombra, c.sombra, ch => { if (g.lineWidth) g.strokeText(ch, 0, 0); g.fillText(ch, 0, 0) })
+  }
+  // 3. brilho (neon)
+  if (c.brilho > 0) {
+    const m = g.getTransform()
+    g.save(); g.shadowColor = c.cor; g.shadowBlur = c.brilho * Math.hypot(m.a, m.b); g.fillStyle = c.cor
+    for (let k = 0; k < 3; k++) cada(0, 0, ch => g.fillText(ch, 0, 0))
+    g.restore()
+  }
+  // 4. contorno externo e contorno
+  if (c.contorno2 > 0) { g.lineWidth = (c.contorno + c.contorno2) * 2; g.strokeStyle = c.contorno2Cor; cada(0, 0, ch => g.strokeText(ch, 0, 0)) }
+  if (c.contorno > 0) { g.lineWidth = c.contorno * 2; g.strokeStyle = c.contornoCor; cada(0, 0, ch => g.strokeText(ch, 0, 0)) }
+  // 5. preenchimento (cor ou degradê vertical por letra)
+  if (c.preencherTexto) {
+    if (c.degrade) {
+      const grad = g.createLinearGradient(0, -c.tamanho / 2, 0, c.tamanho / 2)
+      grad.addColorStop(0, c.cor); grad.addColorStop(1, c.cor2)
+      g.fillStyle = grad
+    } else g.fillStyle = c.cor
+    cada(0, 0, ch => g.fillText(ch, 0, 0))
+  }
+}
+
+function caminhoEstrela(g, l, a, pontas = 5) {
+  g.beginPath()
+  for (let i = 0; i < pontas * 2; i++) {
+    const raio = i % 2 === 0 ? 1 : 0.42
+    const ang = -Math.PI / 2 + (i * Math.PI) / pontas
+    const x = Math.cos(ang) * raio * l / 2, y = Math.sin(ang) * raio * a / 2
+    i ? g.lineTo(x, y) : g.moveTo(x, y)
+  }
+  g.closePath()
+}
+
+function desenharForma(g, c) {
+  g.beginPath()
+  if (c.forma === 'circulo' || c.forma === 'anel') g.ellipse(0, 0, c.l / 2, c.a / 2, 0, 0, Math.PI * 2)
+  else if (c.forma === 'estrela') caminhoEstrela(g, c.l, c.a)
+  else g.roundRect(-c.l / 2, -c.a / 2, c.l, c.a, Math.min(c.raioCanto ?? 0, c.l / 2, c.a / 2))
+  if (c.preencher) { g.fillStyle = c.cor; g.fill() }
+  if (c.contorno > 0) { g.lineWidth = c.contorno; g.strokeStyle = c.contornoCor; g.stroke() }
+}
+
+function imagemDe(src) {
+  if (!imagens.has(src)) { const img = new Image(); img.onload = () => desenhar(); img.src = src; imagens.set(src, img) }
+  return imagens.get(src)
+}
+function desenharImagem(g, c) {
+  const img = imagemDe(c.src)
+  if (img.complete && img.naturalWidth) g.drawImage(img, -c.l / 2, -c.a / 2, c.l, c.a)
+}
+
+/** Desenha as camadas de uma vista no contexto g (já escalado para coordenadas de impressão). */
+function desenharCamadas(g, lista, escala) {
+  const temp = document.createElement('canvas')
+  temp.width = g.canvas.width; temp.height = g.canvas.height
+  const t = temp.getContext('2d')
+  for (const c of lista) {
+    if (c.oculta) continue
+    // cada camada é desenhada à parte e depois composta, para o desgaste e a mesclagem valerem só para ela
+    t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, temp.width, temp.height); t.setTransform(escala, 0, 0, escala, 0, 0)
+    t.save()
+    t.translate(c.x, c.y); t.rotate(c.rot * Math.PI / 180); t.scale(c.escala, c.escala)
+    if (c.tipo === 'texto') desenharTexto(t, c)
+    else if (c.tipo === 'forma') desenharForma(t, c)
+    else desenharImagem(t, c)
+    t.restore()
+    if (c.desgaste > 0) {
+      t.save(); t.setTransform(1, 0, 0, 1, 0, 0)
+      t.globalCompositeOperation = 'destination-out'
+      t.globalAlpha = c.desgaste
+      const padrao = t.createPattern(texturaDesgaste, 'repeat')
+      padrao.setTransform(new DOMMatrix().scale(escala * 4, escala * 4))
+      t.fillStyle = padrao; t.fillRect(0, 0, temp.width, temp.height)
+      t.restore()
+    }
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0)
+    g.globalAlpha = c.opacidade; g.globalCompositeOperation = c.mistura ?? 'source-over'
+    g.drawImage(temp, 0, 0)
+    g.restore()
+  }
+}
+
+let escalaTela = 1
+function posicionarCanvas() {
+  const palco = document.getElementById('palco').getBoundingClientRect()
+  const a = AREA[vista]
+  const k = palco.width / 1000
+  const css = { left: a.x * k, top: a.y * k, width: a.l * k, height: a.a * k }
+  for (const el of [canvas, document.getElementById('areaGuia')]) Object.assign(el.style, { left: css.left + 'px', top: css.top + 'px', width: css.width + 'px', height: css.height + 'px' })
+  const dpr = window.devicePixelRatio || 1
+  canvas.width = Math.max(1, Math.round(css.width * dpr)); canvas.height = Math.max(1, Math.round(css.height * dpr))
+  escalaTela = canvas.width / PW
+  document.getElementById('areaGuia').style.display = document.getElementById('mostrarGuia').checked ? 'block' : 'none'
+  desenhar()
+}
+
+function desenhar() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.setTransform(escalaTela, 0, 0, escalaTela, 0, 0)
+  desenharCamadas(ctx, camadas(), escalaTela)
+  ctx.setTransform(escalaTela, 0, 0, escalaTela, 0, 0)
+  for (const gu of guias) {
+    ctx.save(); ctx.strokeStyle = '#ff3ad2'; ctx.lineWidth = 1.5 / escalaTela
+    ctx.beginPath()
+    if (gu === 'v') { ctx.moveTo(PW / 2, 0); ctx.lineTo(PW / 2, PH) } else { ctx.moveTo(0, PH / 2); ctx.lineTo(PW, PH / 2) }
+    ctx.stroke(); ctx.restore()
+  }
+  const c = camadaSel()
+  if (c) desenharSelecao(c)
+}
+
+function cantos(c) {
+  const { x0, y0, x1, y1 } = caixaLocal(c)
+  const cos = Math.cos(c.rot * Math.PI / 180) * c.escala, sen = Math.sin(c.rot * Math.PI / 180) * c.escala
+  const p = (x, y) => ({ x: c.x + x * cos - y * sen, y: c.y + x * sen + y * cos })
+  const mx = (x0 + x1) / 2
+  return { p, pts: [p(x0, y0), p(x1, y0), p(x1, y1), p(x0, y1)], alca: p(x1, y1), topo: p(mx, y0), giro: p(mx, y0 - 260 / c.escala) }
+}
+
+function desenharSelecao(c) {
+  const { pts, alca, giro, topo } = cantos(c)
+  const px = 1 / escalaTela
+  ctx.save()
+  ctx.lineWidth = 1.5 * px; ctx.strokeStyle = '#e8ff3a'; ctx.setLineDash([6 * px, 4 * px])
+  ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.closePath(); ctx.stroke()
+  ctx.setLineDash([])
+  ctx.beginPath(); ctx.moveTo(topo.x, topo.y); ctx.lineTo(giro.x, giro.y); ctx.stroke()
+  ctx.fillStyle = '#e8ff3a'
+  ctx.beginPath(); ctx.arc(giro.x, giro.y, 7 * px, 0, Math.PI * 2); ctx.fill()
+  ctx.fillRect(alca.x - 7 * px, alca.y - 7 * px, 14 * px, 14 * px)
+  ctx.restore()
+}
+
+// ── camisa (mockup em SVG) ──────────────────────────────────────────────
+function svgCamisa(cor, lado) {
+  const escuro = luminancia(cor) < 0.5
+  const sombra = escuro ? 'rgba(0,0,0,.45)' : 'rgba(0,0,0,.16)'
+  const luz = escuro ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.35)'
+  const gola = lado === 'frente'
+    ? `<path d="M405 92 Q500 190 595 92" fill="none" stroke="${sombra}" stroke-width="18"/><path d="M405 92 Q500 170 595 92" fill="none" stroke="${luz}" stroke-width="5"/>`
+    : `<path d="M415 92 Q500 125 585 92" fill="none" stroke="${sombra}" stroke-width="14"/>`
+  const contorno = 'M405 92 L300 120 L118 230 L48 420 L190 470 L230 405 L232 1040 Q500 1068 768 1040 L770 405 L810 470 L952 420 L882 230 L700 120 L595 92'
+  return `
+    <defs>
+      <linearGradient id="dobra" x1="0" x2="1"><stop offset="0" stop-color="${sombra}"/><stop offset=".18" stop-color="rgba(0,0,0,0)"/><stop offset=".82" stop-color="rgba(0,0,0,0)"/><stop offset="1" stop-color="${sombra}"/></linearGradient>
+      <linearGradient id="luz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${luz}"/><stop offset=".5" stop-color="rgba(255,255,255,0)"/></linearGradient>
+    </defs>
+    <path d="${contorno} Q500 ${lado === 'frente' ? 175 : 120} 405 92 Z" fill="${cor}"/>
+    <path d="M232 405 L232 1040 Q500 1068 768 1040 L770 405 Z" fill="url(#dobra)"/>
+    <path d="${contorno} Z" fill="url(#luz)" opacity=".8"/>
+    <path d="M230 405 L190 470 M770 405 L810 470" stroke="${sombra}" stroke-width="6"/>
+    <path d="M232 400 Q240 300 300 120 M768 400 Q760 300 700 120" stroke="${sombra}" stroke-width="4" fill="none" opacity=".6"/>
+    ${gola}`
+}
+function luminancia(hex) {
+  const n = parseInt(String(hex).slice(1), 16)
+  return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255
+}
+function desenharCamisa() { document.getElementById('camisa').innerHTML = svgCamisa(estado.corCamisa, vista) }
+
+// ── contador de cores (serigrafia) ──────────────────────────────────────
+function contarCores() {
+  const cores = new Set()
+  let colorida = false, degrade = false
+  for (const c of camadas()) {
+    if (c.oculta) continue
+    if (c.tipo === 'texto') {
+      if (c.preencherTexto) cores.add(c.cor.toLowerCase())
+      if (c.preencherTexto && c.degrade) { cores.add(c.cor2.toLowerCase()); degrade = true }
+      if (c.contorno > 0) cores.add(c.contornoCor.toLowerCase())
+      if (c.contorno2 > 0) cores.add(c.contorno2Cor.toLowerCase())
+      if (c.sombra > 0 || c.extrusao > 0) cores.add(c.sombraCor.toLowerCase())
+      if (c.brilho > 0) degrade = true
+    } else if (c.tipo === 'forma') {
+      if (c.preencher) cores.add(c.cor.toLowerCase())
+      if (c.contorno > 0) cores.add(c.contornoCor.toLowerCase())
+    } else if (c.processo === 'corUnica') cores.add(c.tinta.toLowerCase())
+    else colorida = true
+    if (c.opacidade < 1 || (c.mistura && c.mistura !== 'source-over')) degrade = true
+  }
+  const n = cores.size
+  const el = document.getElementById('cores')
+  if (!camadas().length) el.innerHTML = '🎨 vazio'
+  else if (colorida || degrade) el.innerHTML = `🎨 <b>${n}</b> cor${n === 1 ? '' : 'es'} + ${colorida ? 'imagem colorida' : 'degradê/transparência'} · melhor em <b>DTF</b>`
+  else el.innerHTML = `🎨 <b>${n}</b> cor${n === 1 ? '' : 'es'} · serigrafia: <b>${n}</b> tela${n === 1 ? '' : 's'}`
+}
+
+// ── interação no palco ──────────────────────────────────────────────────
+let arraste = null
+function paraImpressao(e) {
+  const r = canvas.getBoundingClientRect()
+  return { x: (e.clientX - r.left) / r.width * PW, y: (e.clientY - r.top) / r.height * PH }
+}
+function dentro(c, p) {
+  const { x0, y0, x1, y1 } = caixaLocal(c)
+  const ang = -c.rot * Math.PI / 180
+  const dx = p.x - c.x, dy = p.y - c.y
+  const x = (dx * Math.cos(ang) - dy * Math.sin(ang)) / c.escala, y = (dx * Math.sin(ang) + dy * Math.cos(ang)) / c.escala
+  return x >= x0 && x <= x1 && y >= y0 && y <= y1
+}
+canvas.addEventListener('pointerdown', e => {
+  const p = paraImpressao(e)
+  const tol = 14 / escalaTela
+  const c = camadaSel()
+  if (c && !c.travada) {
+    const { alca, giro } = cantos(c)
+    if (Math.hypot(alca.x - p.x, alca.y - p.y) < tol * 1.4) arraste = { modo: 'escala', c, inicio: c.escala, dist: Math.hypot(p.x - c.x, p.y - c.y) }
+    else if (Math.hypot(giro.x - p.x, giro.y - p.y) < tol * 1.4) arraste = { modo: 'giro', c }
+  }
+  if (!arraste) {
+    const alvo = [...camadas()].reverse().find(k => !k.oculta && dentro(k, p))
+    selecionada = alvo?.id ?? null
+    if (alvo && !alvo.travada) arraste = { modo: 'mover', c: alvo, dx: p.x - alvo.x, dy: p.y - alvo.y }
+    montarCamadas(); montarProps(); desenhar()
+  }
+  if (arraste) { salvarHistorico(); canvas.setPointerCapture(e.pointerId) }
+})
+canvas.addEventListener('pointermove', e => {
+  if (!arraste) return
+  const p = paraImpressao(e), c = arraste.c
+  guias = []
+  if (arraste.modo === 'mover') {
+    c.x = p.x - arraste.dx; c.y = p.y - arraste.dy
+    const ima = 12 / escalaTela
+    if (Math.abs(c.x - PW / 2) < ima) { c.x = PW / 2; guias.push('v') }
+    if (Math.abs(c.y - PH / 2) < ima) { c.y = PH / 2; guias.push('h') }
+  } else if (arraste.modo === 'escala') {
+    c.escala = Math.max(0.05, arraste.inicio * Math.hypot(p.x - c.x, p.y - c.y) / arraste.dist)
+  } else {
+    let ang = Math.atan2(p.y - c.y, p.x - c.x) * 180 / Math.PI + 90
+    if (ang > 180) ang -= 360
+    if (e.shiftKey) ang = Math.round(ang / 15) * 15
+    else if (Math.abs(ang - Math.round(ang / 90) * 90) < 3) ang = Math.round(ang / 90) * 90
+    c.rot = Math.round(ang)
+  }
+  desenhar()
+})
+canvas.addEventListener('pointerup', () => { if (arraste) { arraste = null; guias = []; mudou(false) } })
+
+window.addEventListener('keydown', e => {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return
+  const c = camadaSel()
+  const mod = e.metaKey || e.ctrlKey
+  if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? refazer() : desfazer(); return }
+  if (!c) return
+  if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); remover(c.id) }
+  else if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicar(c) }
+  else if (e.key.startsWith('Arrow')) {
+    e.preventDefault(); salvarHistorico()
+    const d = e.shiftKey ? 100 : 15
+    if (e.key === 'ArrowLeft') c.x -= d
+    if (e.key === 'ArrowRight') c.x += d
+    if (e.key === 'ArrowUp') c.y -= d
+    if (e.key === 'ArrowDown') c.y += d
+    mudou(false)
+  }
+})
+
+function remover(id) { salvarHistorico(); estado.camadas[vista] = camadas().filter(c => c.id !== id); if (selecionada === id) selecionada = null; mudou(false) }
+function duplicar(c) { adicionar({ ...structuredClone(c), id: uid(), x: c.x + 120, y: c.y + 120 }) }
+function desfazer() { if (!historico.length) return; refeito.push(JSON.stringify(estado)); estado = JSON.parse(historico.pop()); posAlterarEstado() }
+function refazer() { if (!refeito.length) return; historico.push(JSON.stringify(estado)); estado = JSON.parse(refeito.pop()); posAlterarEstado() }
+function posAlterarEstado() { if (!camadaSel()) selecionada = null; persistir(); desenharCamisa(); montarCoresCamisa(); montarMarca(); desenhar(); montarCamadas(); montarProps(); contarCores() }
+
+/** Alinha a camada à área de impressão pelo seu contorno real (já girado e escalado). */
+function alinhar(c, como) {
+  const { pts } = cantos(c)
+  const xs = pts.map(q => q.x), ys = pts.map(q => q.y)
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys)
+  const margem = 120
+  if (como === 'esquerda') c.x += margem - minX
+  if (como === 'centroH') c.x += PW / 2 - (minX + maxX) / 2
+  if (como === 'direita') c.x += PW - margem - maxX
+  if (como === 'topo') c.y += margem - minY
+  if (como === 'centroV') c.y += PH / 2 - (minY + maxY) / 2
+  if (como === 'base') c.y += PH - margem - maxY
+}
+
+// ── efeitos prontos de texto ────────────────────────────────────────────
+const LIMPO = { contorno: 0, contorno2: 0, sombra: 0, extrusao: 0, brilho: 0, degrade: false, preencherTexto: true, desgaste: 0 }
+const EFEITOS = {
+  'Contorno duplo': m => ({ ...LIMPO, contorno: 30, contornoCor: m.paleta[1], contorno2: 30, contorno2Cor: m.paleta[2] }),
+  'Sombra 3D': m => ({ ...LIMPO, extrusao: 140, sombraCor: m.paleta[3], contorno: 18, contornoCor: m.paleta[1] }),
+  'Neon': m => ({ ...LIMPO, brilho: 90, cor: m.paleta[2], contorno: 8, contornoCor: '#ffffff' }),
+  'Retrô': m => ({ ...LIMPO, contorno: 22, contornoCor: m.paleta[1], contorno2: 26, contorno2Cor: m.paleta[4], sombra: 90, sombraCor: m.paleta[3] }),
+  'Vazado': m => ({ ...LIMPO, preencherTexto: false, contorno: 14, contornoCor: m.paleta[0] }),
+  'Vintage': m => ({ ...LIMPO, cor: m.paleta[4], desgaste: 0.55 }),
+  'Degradê': m => ({ ...LIMPO, degrade: true, cor: m.paleta[2], cor2: m.paleta[3] }),
+  'Limpar': () => ({ ...LIMPO }),
+}
+
+// ── imagem: preparo para serigrafia ─────────────────────────────────────
+function processarImagem(c, processo) {
+  if (processo === 'restaurar') { c.src = c.srcOriginal; c.processo = null; return Promise.resolve() }
+  return new Promise(ok => {
+    const img = new Image()
+    img.onload = () => {
+      const k = Math.min(1, 3000 / Math.max(img.naturalWidth, img.naturalHeight))
+      const t = document.createElement('canvas'); t.width = Math.round(img.naturalWidth * k); t.height = Math.round(img.naturalHeight * k)
+      const g = t.getContext('2d'); g.drawImage(img, 0, 0, t.width, t.height)
+      const dados = g.getImageData(0, 0, t.width, t.height), px = dados.data
+      const tinta = parseInt(c.tinta.slice(1), 16), tr = (tinta >> 16) & 255, tg = (tinta >> 8) & 255, tb = tinta & 255
+      const lim = c.limiar
+      for (let i = 0; i < px.length; i += 4) {
+        const r = px[i], gg = px[i + 1], b = px[i + 2]
+        const brilho = (0.299 * r + 0.587 * gg + 0.114 * b) / 255
+        if (processo === 'semFundo') {
+          const sat = (Math.max(r, gg, b) - Math.min(r, gg, b)) / 255
+          if (brilho > lim && sat < 0.15) px[i + 3] = Math.round(px[i + 3] * Math.max(0, (1 - brilho) / (1 - lim) - 0.0))
+        } else if (processo === 'corUnica') {
+          // escuro vira tinta; claro some (ideal para logos e desenhos em fundo claro)
+          px[i + 3] = Math.round(px[i + 3] * Math.max(0, Math.min(1, (lim - brilho) / Math.max(0.05, lim) * 1.6)))
+          px[i] = tr; px[i + 1] = tg; px[i + 2] = tb
+        } else if (processo === 'contraste') {
+          const v = brilho < lim * 0.6 ? 0 : 255
+          px[i] = px[i + 1] = px[i + 2] = v
+        } else if (processo === 'inverter') {
+          px[i] = 255 - r; px[i + 1] = 255 - gg; px[i + 2] = 255 - b
+        }
+      }
+      g.putImageData(dados, 0, 0)
+      c.src = t.toDataURL('image/png')
+      c.processo = processo === 'inverter' || processo === 'contraste' ? c.processo : processo
+      ok()
+    }
+    img.src = c.src
+  })
+}
+
+// ── painéis ─────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id)
+function aviso(t) { const a = $('aviso'); a.textContent = t; a.classList.add('on'); clearTimeout(aviso.t); aviso.t = setTimeout(() => a.classList.remove('on'), 2400) }
+
+function montarCoresCamisa() {
+  $('coresCamisa').innerHTML = CORES_CAMISA.map(([n, c]) => `<button class="cor ${c === estado.corCamisa ? 'ativo' : ''}" style="background:${c}" title="${n}" data-cor="${c}"></button>`).join('')
+}
+$('coresCamisa').addEventListener('click', e => { const b = e.target.closest('[data-cor]'); if (!b) return; salvarHistorico(); estado.corCamisa = b.dataset.cor; persistir(); desenharCamisa(); montarCoresCamisa() })
+
+const escapar = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch])
+function nomeCamada(c) { return c.tipo === 'texto' ? `“${String(c.texto).replace(/\n/g, ' ').slice(0, 22)}”` : c.nome }
+function montarCamadas() {
+  const lista = [...camadas()].reverse()
+  $('camadas').innerHTML = lista.length ? lista.map(c => `
+    <div class="camada ${c.id === selecionada ? 'sel' : ''}" data-id="${c.id}">
+      <span>${c.tipo === 'texto' ? 'T' : c.tipo === 'imagem' ? '🖼' : '◆'}</span>
+      <span class="nome">${escapar(nomeCamada(c))}</span>
+      <button data-acao="subir" title="Para frente">↑</button>
+      <button data-acao="descer" title="Para trás">↓</button>
+      <button data-acao="ver" title="Mostrar/ocultar">${c.oculta ? '◌' : '👁'}</button>
+      <button data-acao="travar" title="Travar">${c.travada ? '🔒' : '🔓'}</button>
+    </div>`).join('') : '<p class="vazio">Nada nesta vista ainda. Use um modelo ou adicione um texto.</p>'
+}
+$('camadas').addEventListener('click', e => {
+  const linha = e.target.closest('.camada'); if (!linha) return
+  const lista = camadas(), i = lista.findIndex(c => c.id === linha.dataset.id), c = lista[i]
+  const acao = e.target.closest('[data-acao]')?.dataset.acao
+  if (!acao) { selecionada = c.id; montarCamadas(); montarProps(); desenhar(); return }
+  salvarHistorico()
+  if (acao === 'subir' && i < lista.length - 1) [lista[i], lista[i + 1]] = [lista[i + 1], lista[i]]
+  if (acao === 'descer' && i > 0) [lista[i], lista[i - 1]] = [lista[i - 1], lista[i]]
+  if (acao === 'ver') c.oculta = !c.oculta
+  if (acao === 'travar') c.travada = !c.travada
+  mudou(false)
+})
+
+const FORMATOS = { rot: v => `${Math.round(v)}°`, curva: v => `${Math.round(v)}°`, escala: v => `${v.toFixed(2)}×`, opacidade: v => v.toFixed(2), desgaste: v => v.toFixed(2), altura: v => v.toFixed(2), limiar: v => v.toFixed(2), frequencia: v => v.toFixed(1) }
+const formatarValor = (k, v) => (FORMATOS[k] ?? (x => String(Math.round(x))))(Number(v))
+
+function controle(tipo, chave, rotulo, o = {}) {
+  const c = camadaSel(), v = c[chave]
+  if (tipo === 'faixa') return `<label>${rotulo} <span class="valor" data-valor="${chave}">${formatarValor(chave, v)}</span></label><input type="range" data-k="${chave}" min="${o.min}" max="${o.max}" step="${o.passo ?? 1}" value="${v}">`
+  if (tipo === 'cor') return `<input type="color" data-k="${chave}" value="${v}" title="${rotulo}">`
+  if (tipo === 'texto') return `<label>${rotulo}</label><textarea data-k="${chave}" rows="2">${escapar(v)}</textarea>`
+  if (tipo === 'selecao') return `<label>${rotulo}</label><select data-k="${chave}" ${o.recriar ? 'data-recriar="1"' : ''}>${o.opcoes.map(([val, n]) => `<option value="${val}" ${String(val) === String(v) ? 'selected' : ''} style="font-family:'${val}'">${n}</option>`).join('')}</select>`
+  if (tipo === 'check') return `<label class="check"><input type="checkbox" data-k="${chave}" ${v ? 'checked' : ''}> ${rotulo}</label>`
+}
+const secao = (titulo, html) => `<div class="secao"><div class="titulo">${titulo}</div>${html}</div>`
+
+function montarProps() {
+  const c = camadaSel()
+  if (!c) { $('props').innerHTML = '<p class="vazio">Selecione uma camada para editar.</p>'; return }
+  const alinhamento = secao('Alinhar na área', `<div class="grade3" style="margin-top:8px">
+      <button data-alinhar="esquerda" title="Esquerda">⇤</button><button data-alinhar="centroH" title="Centro horizontal">↔</button><button data-alinhar="direita" title="Direita">⇥</button>
+      <button data-alinhar="topo" title="Topo">⤒</button><button data-alinhar="centroV" title="Centro vertical">↕</button><button data-alinhar="base" title="Base">⤓</button></div>`)
+  const comum = secao('Camada', `
+    ${controle('faixa', 'rot', 'Rotação', { min: -180, max: 180 })}
+    ${controle('faixa', 'escala', 'Tamanho', { min: 0.05, max: 4, passo: 0.01 })}
+    ${controle('faixa', 'opacidade', 'Opacidade', { min: 0, max: 1, passo: 0.01 })}
+    ${controle('selecao', 'mistura', 'Mesclagem', { opcoes: MISTURAS })}
+    ${controle('faixa', 'desgaste', 'Desgaste (vintage)', { min: 0, max: 1, passo: 0.01 })}
+    <div class="grade2" style="margin-top:12px"><button data-acao="duplicar">Duplicar</button><button data-acao="apagar" class="perigo">Apagar</button></div>`)
+  let especifico = ''
+  if (c.tipo === 'texto') {
+    const modo = {
+      arco: controle('faixa', 'curva', 'Curvatura', { min: -330, max: 330 }),
+      circulo: controle('faixa', 'raio', 'Raio do círculo', { min: 200, max: 2400 }) + controle('check', 'embaixo', 'Texto na parte de baixo'),
+      onda: controle('faixa', 'amplitude', 'Altura da onda', { min: 0, max: 800 }) + controle('faixa', 'frequencia', 'Ondas', { min: 0.5, max: 4, passo: 0.1 }),
+      reto: controle('faixa', 'altura', 'Altura da linha', { min: 0.6, max: 2, passo: 0.01 }),
+    }[c.modo]
+    especifico = `
+      ${controle('texto', 'texto', 'Texto')}
+      ${controle('selecao', 'fonte', 'Fonte', { opcoes: FONTES.map(f => [f, f]) })}
+      <div class="secao"><div class="titulo">Efeitos prontos</div><div class="grade2" style="margin-top:8px">
+        ${Object.keys(EFEITOS).map(n => `<button class="efeito" data-efeito="${n}">${n}</button>`).join('')}</div></div>
+      ${secao('Forma do texto', controle('selecao', 'modo', 'Forma', { opcoes: FORMAS_TEXTO, recriar: true }) + modo + controle('faixa', 'espacamento', 'Espaço entre letras', { min: -100, max: 400 }) + controle('check', 'italico', 'Itálico'))}
+      ${secao('Cor e traço', `
+        <label>Cor · degradê · contorno · contorno externo · sombra</label>
+        <div class="linha">${controle('cor', 'cor', 'Cor')}${controle('cor', 'cor2', 'Segunda cor (degradê)')}${controle('cor', 'contornoCor', 'Contorno')}${controle('cor', 'contorno2Cor', 'Contorno externo')}${controle('cor', 'sombraCor', 'Sombra')}</div>
+        ${controle('check', 'preencherTexto', 'Preencher')}
+        ${controle('check', 'degrade', 'Degradê')}
+        ${controle('faixa', 'contorno', 'Contorno', { min: 0, max: 120 })}
+        ${controle('faixa', 'contorno2', 'Contorno externo', { min: 0, max: 120 })}
+        ${controle('faixa', 'sombra', 'Sombra chapada', { min: 0, max: 250 })}
+        ${controle('faixa', 'extrusao', 'Sombra 3D', { min: 0, max: 400 })}
+        ${controle('faixa', 'brilho', 'Brilho neon', { min: 0, max: 200 })}`)}`
+  } else if (c.tipo === 'forma') {
+    especifico = secao('Forma', `
+      <label>Preenchimento · contorno</label>
+      <div class="linha">${controle('cor', 'cor', 'Cor')}${controle('cor', 'contornoCor', 'Cor do contorno')}</div>
+      ${controle('check', 'preencher', 'Preencher')}
+      ${controle('faixa', 'contorno', 'Contorno', { min: 0, max: 200 })}
+      ${controle('faixa', 'l', 'Largura', { min: 20, max: PW })}
+      ${controle('faixa', 'a', 'Altura', { min: 10, max: PH })}
+      ${c.forma === 'retangulo' ? controle('faixa', 'raioCanto', 'Cantos arredondados', { min: 0, max: 700 }) : ''}`)
+  } else {
+    especifico = secao('Preparar para serigrafia', `
+      <div class="grade2" style="margin-top:8px">
+        <button data-processo="semFundo">Tirar fundo branco</button>
+        <button data-processo="corUnica">Cor única</button>
+        <button data-processo="contraste">Alto contraste</button>
+        <button data-processo="inverter">Inverter</button>
+      </div>
+      <label>Cor da tinta (para “cor única”)</label>
+      <div class="linha">${controle('cor', 'tinta', 'Tinta')}<button data-processo="restaurar">Restaurar original</button></div>
+      ${controle('faixa', 'limiar', 'Sensibilidade', { min: 0.3, max: 0.98, passo: 0.01 })}`)
+  }
+  $('props').innerHTML = especifico + alinhamento + comum
+}
+
+$('props').addEventListener('input', e => {
+  const k = e.target.dataset.k, c = camadaSel(); if (!k || !c) return
+  if (!$('props').dataset.editando) { salvarHistorico(); $('props').dataset.editando = '1' }
+  const el = e.target
+  c[k] = el.type === 'checkbox' ? el.checked : el.type === 'range' ? Number(el.value) : el.value
+  const rotulo = $('props').querySelector(`[data-valor="${k}"]`)
+  if (rotulo) rotulo.textContent = formatarValor(k, c[k])
+  persistir(); desenhar(); contarCores()
+  if (k === 'texto') montarCamadas()
+  if (el.dataset.recriar) { delete $('props').dataset.editando; montarProps() }
+})
+$('props').addEventListener('change', () => { delete $('props').dataset.editando })
+$('props').addEventListener('click', async e => {
+  const c = camadaSel(); if (!c) return
+  const b = e.target.closest('button'); if (!b) return
+  if (b.dataset.acao === 'duplicar') return duplicar(c)
+  if (b.dataset.acao === 'apagar') return remover(c.id)
+  if (b.dataset.alinhar) { salvarHistorico(); alinhar(c, b.dataset.alinhar); return mudou(false) }
+  if (b.dataset.efeito) { salvarHistorico(); Object.assign(c, EFEITOS[b.dataset.efeito](estado.marca)); return mudou(false) }
+  if (b.dataset.processo) {
+    salvarHistorico(); b.disabled = true
+    await processarImagem(c, b.dataset.processo)
+    mudou(false)
+    aviso({ semFundo: 'Fundo branco removido.', corUnica: 'Imagem em uma cor só: pronta para uma tela de serigrafia.', contraste: 'Alto contraste aplicado.', inverter: 'Cores invertidas.', restaurar: 'Imagem original de volta.' }[b.dataset.processo])
+  }
+})
+
+// ── kit da marca ────────────────────────────────────────────────────────
+function montarMarca() {
+  $('marcaNome').value = estado.marca.nome; $('marcaFrase').value = estado.marca.frase; $('marcaAno').value = estado.marca.ano
+  $('paleta').innerHTML = estado.marca.paleta.map((c, i) => `<span class="chip" style="background:${c}" data-i="${i}" title="${c}"></span>`).join('') +
+    `<input type="color" id="novaCor" value="#ffffff" title="Adicionar cor à paleta">`
+}
+for (const [id, k] of [['marcaNome', 'nome'], ['marcaFrase', 'frase'], ['marcaAno', 'ano']]) {
+  $(id).addEventListener('change', e => { salvarHistorico(); estado.marca[k] = e.target.value; persistir() })
+}
+$('paleta').addEventListener('click', e => {
+  const chip = e.target.closest('.chip'); if (!chip) return
+  const c = camadaSel(); if (!c) return aviso('Selecione uma camada para pintar.')
+  salvarHistorico()
+  const cor = estado.marca.paleta[chip.dataset.i]
+  if (c.tipo === 'imagem') c.tinta = cor
+  else if (c.forma === 'anel') c.contornoCor = cor
+  else c.cor = cor
+  mudou(false)
+})
+$('paleta').addEventListener('contextmenu', e => {
+  const chip = e.target.closest('.chip'); if (!chip) return
+  e.preventDefault(); salvarHistorico(); estado.marca.paleta.splice(Number(chip.dataset.i), 1); persistir(); montarMarca()
+})
+$('paleta').addEventListener('change', e => { if (e.target.id === 'novaCor') { salvarHistorico(); estado.marca.paleta.push(e.target.value); persistir(); montarMarca() } })
+
+function lerImagem(arquivo) {
+  return new Promise((ok, erro) => {
+    const leitor = new FileReader()
+    leitor.onload = () => { const img = new Image(); img.onload = () => ok({ src: leitor.result, l: img.naturalWidth, a: img.naturalHeight }); img.onerror = erro; img.src = leitor.result }
+    leitor.onerror = erro
+    leitor.readAsDataURL(arquivo)
+  })
+}
+$('enviarLogo').onclick = () => $('arquivoLogo').click()
+$('arquivoLogo').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return
+  salvarHistorico(); estado.marca.logo = await lerImagem(f); persistir(); aviso('Logo salvo no kit da marca.'); e.target.value = ''
+}
+$('usarLogo').onclick = () => {
+  const logo = estado.marca.logo; if (!logo) return aviso('Envie o logo primeiro.')
+  adicionar(novaImagem(logo.src, logo.l, logo.a, { nome: 'Logo' }))
+}
+
+// ── modelos ─────────────────────────────────────────────────────────────
+const MODELOS = [
+  { nome: 'Número gigante', icone: '148', fonte: 'Anton', criar: m => [
+    novoTexto({ texto: m.nome, tamanho: 2300, y: 2050, espacamento: -40 }),
+    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 260, y: 3500, espacamento: 60 }),
+    novoTexto({ texto: `EST. ${m.ano}`, fonte: 'Space Grotesk', peso: 700, tamanho: 170, y: 3850, espacamento: 120, cor: m.paleta[2] }),
+  ] },
+  { nome: 'Arco clássico', icone: '⌒', fonte: 'Archivo Black', criar: m => [
+    novoTexto({ texto: `${m.nome} CLOTHING`, fonte: 'Archivo Black', tamanho: 430, modo: 'arco', curva: 120, y: 1500, espacamento: 30 }),
+    novaForma('estrela', { l: 900, a: 900, y: 2500, cor: m.paleta[2] }),
+    novoTexto({ texto: `DESDE ${m.ano}`, fonte: 'Archivo Black', tamanho: 300, modo: 'arco', curva: -90, y: 3500, espacamento: 40 }),
+  ] },
+  { nome: 'Gótico', icone: '𝔊', fonte: 'UnifrakturCook', criar: m => [
+    novoTexto({ texto: m.nome, fonte: 'UnifrakturCook', peso: 700, tamanho: 1900, y: 2100, contorno: 40, contornoCor: m.paleta[1], sombra: 90, sombraCor: m.paleta[3] }),
+    novoTexto({ texto: m.frase, fonte: 'UnifrakturCook', peso: 700, tamanho: 330, y: 3400 }),
+  ] },
+  { nome: 'Peito esquerdo', icone: '▘', fonte: 'Unbounded', vista: 'frente', criar: m => [
+    novoTexto({ texto: m.nome, fonte: 'Unbounded', peso: 800, tamanho: 420, x: 2650, y: 900 }),
+    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 110, x: 2650, y: 1230, espacamento: 30 }),
+  ] },
+  { nome: 'Selo circular', icone: '◎', fonte: 'Bebas Neue', criar: m => [
+    novaForma('anel', { l: 2600, a: 2600, y: 2400, contorno: 60, contornoCor: m.paleta[0] }),
+    novaForma('anel', { l: 1900, a: 1900, y: 2400, contorno: 20, contornoCor: m.paleta[0] }),
+    novoTexto({ texto: m.frase, fonte: 'Bebas Neue', tamanho: 260, modo: 'circulo', raio: 1110, y: 2400, espacamento: 40 }),
+    novoTexto({ texto: `EST. ${m.ano}`, fonte: 'Bebas Neue', tamanho: 220, modo: 'circulo', raio: 1110, embaixo: true, y: 2400, espacamento: 60, cor: m.paleta[2] }),
+    novoTexto({ texto: m.nome, fonte: 'Bebas Neue', tamanho: 1000, y: 2420 }),
+  ] },
+  { nome: 'Empilhado', icone: '≡', fonte: 'Bebas Neue', criar: m => [
+    novoTexto({ texto: m.frase.split(' ').join('\n'), fonte: 'Bebas Neue', tamanho: 900, altura: 0.88, y: 1900, desgaste: 0.45 }),
+    novaForma('linha', { l: 2800, a: 40, y: 3420 }),
+    novoTexto({ texto: `${m.nome} — ${m.ano}`, fonte: 'Space Grotesk', peso: 700, tamanho: 220, y: 3700, espacamento: 90 }),
+  ] },
+  { nome: 'Onda retrô', icone: '〰', fonte: 'Rubik Mono One', criar: m => [
+    novoTexto({ texto: m.nome, fonte: 'Rubik Mono One', tamanho: 1100, modo: 'onda', amplitude: 220, frequencia: 1, y: 2000, ...EFEITOS['Retrô'](m) }),
+    novoTexto({ texto: m.frase, fonte: 'Rubik Mono One', tamanho: 200, y: 3300, espacamento: 30, cor: m.paleta[4] }),
+  ] },
+  { nome: 'Neon', icone: '✺', fonte: 'Monoton', criar: m => [
+    novoTexto({ texto: m.nome, fonte: 'Monoton', tamanho: 1500, y: 2100, ...EFEITOS['Neon'](m) }),
+    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 220, y: 3300, espacamento: 80, cor: m.paleta[0] }),
+  ] },
+]
+$('modelos').innerHTML = MODELOS.map((m, i) => `<button class="modelo" data-i="${i}"><span><b style="font-family:'${m.fonte}'">${m.icone}</b>${m.nome}</span></button>`).join('')
+$('modelos').addEventListener('click', e => {
+  const b = e.target.closest('[data-i]'); if (!b) return
+  const m = MODELOS[b.dataset.i]
+  if (m.vista && m.vista !== vista) trocarVista(m.vista)
+  salvarHistorico()
+  const novas = m.criar(estado.marca)
+  // em camisa clara, a cor principal (clara) vira a escura da paleta
+  if (luminancia(estado.corCamisa) > 0.6) for (const c of novas) for (const k of ['cor', 'contornoCor', 'contorno2Cor']) if (c[k] === estado.marca.paleta[0]) c[k] = estado.marca.paleta[1]
+  camadas().push(...novas)
+  selecionada = novas[novas.length - 1].id
+  mudou(false)
+  aviso(`Modelo “${m.nome}” adicionado. Edite os textos no painel da direita.`)
+})
+
+// ── botões do topo ──────────────────────────────────────────────────────
+$('addTexto').onclick = () => adicionar(novoTexto())
+$('addCirculo').onclick = () => adicionar(novaForma('circulo'))
+$('addRetangulo').onclick = () => adicionar(novaForma('retangulo'))
+$('addEstrela').onclick = () => adicionar(novaForma('estrela'))
+$('addLinha').onclick = () => adicionar(novaForma('linha'))
+$('addImagem').onclick = () => $('arquivoImagem').click()
+$('arquivoImagem').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return
+  const img = await lerImagem(f)
+  adicionar(novaImagem(img.src, img.l, img.a, { nome: f.name.replace(/\.[^.]+$/, '').slice(0, 24) }))
+  e.target.value = ''
+}
+$('desfazer').onclick = desfazer
+$('refazer').onclick = refazer
+$('novo').onclick = () => { if (!confirm('Começar um projeto novo? (o kit da marca é mantido)')) return; salvarHistorico(); estado.camadas = { frente: [], costas: [] }; selecionada = null; mudou(false) }
+$('mostrarGuia').onchange = () => posicionarCanvas()
+
+function trocarVista(v) {
+  vista = v; selecionada = null
+  $('vistaFrente').classList.toggle('ativo', v === 'frente'); $('vistaCostas').classList.toggle('ativo', v === 'costas')
+  desenharCamisa(); posicionarCanvas(); montarCamadas(); montarProps(); contarCores()
+}
+$('vistaFrente').onclick = () => trocarVista('frente')
+$('vistaCostas').onclick = () => trocarVista('costas')
+
+function baixar(blob, nome) {
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = nome; document.body.appendChild(a); a.click(); a.remove()
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000)
+}
+const nomeArquivo = sufixo => `${(estado.marca.nome || 'estampa').replace(/[^\w-]+/g, '_')}-${vista}-${sufixo}`
+
+function renderizarArte() {
+  const c = document.createElement('canvas'); c.width = PW; c.height = PH
+  const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0)
+  desenharCamadas(g, camadas(), 1)
+  return c
+}
+
+$('exportarArte').onclick = async () => {
+  await document.fonts.ready
+  renderizarArte().toBlob(b => { baixar(b, nomeArquivo('impressao-3600x4800.png')); aviso('Arte baixada: PNG transparente 3600×4800 (30×40 cm a 300 dpi).') }, 'image/png')
+}
+
+$('exportarMockup').onclick = async () => {
+  await document.fonts.ready
+  const L = 2000, A = 2200, k = L / 1000
+  const c = document.createElement('canvas'); c.width = L; c.height = A
+  const g = c.getContext('2d')
+  g.fillStyle = luminancia(estado.corCamisa) < 0.5 ? '#e9e7e2' : '#1a1a1d'; g.fillRect(0, 0, L, A)
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1100" width="${L}" height="${A}">${svgCamisa(estado.corCamisa, vista)}</svg>`
+  const img = new Image()
+  img.onload = () => {
+    g.drawImage(img, 0, 0, L, A)
+    const area = AREA[vista]
+    g.drawImage(renderizarArte(), area.x * k, area.y * k, area.l * k, area.a * k)
+    g.font = '600 34px Inter, sans-serif'; g.fillStyle = luminancia(estado.corCamisa) < 0.5 ? '#333' : '#aaa'; g.textAlign = 'center'
+    g.fillText(`${estado.marca.nome} · ${vista}`, L / 2, A - 40)
+    c.toBlob(b => { baixar(b, nomeArquivo('mockup.png')); aviso('Mockup baixado.') }, 'image/png')
+  }
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+}
+
+$('salvar').onclick = () => { baixar(new Blob([JSON.stringify(estado)], { type: 'application/json' }), `${(estado.marca.nome || 'projeto').replace(/[^\w-]+/g, '_')}-projeto.json`); aviso('Projeto salvo.') }
+$('abrir').onclick = () => $('arquivoProjeto').click()
+$('arquivoProjeto').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return
+  try { const novo = migrar(JSON.parse(await f.text())); if (!novo?.camadas) throw new Error(); salvarHistorico(); estado = novo; selecionada = null; posAlterarEstado(); aviso('Projeto aberto.') }
+  catch { aviso('Esse arquivo não é um projeto do 148 Estúdio.') }
+  e.target.value = ''
+}
+
+// ── início ──────────────────────────────────────────────────────────────
+window.addEventListener('resize', posicionarCanvas)
+document.fonts.ready.then(() => desenhar())
+desenharCamisa(); montarCoresCamisa(); montarMarca(); montarCamadas(); montarProps(); posicionarCanvas(); contarCores()
+if (!estado.camadas.frente.length && !estado.camadas.costas.length) {
+  camadas().push(...MODELOS[0].criar(estado.marca)); persistir(); desenhar(); montarCamadas(); contarCores()
+}
+window.estudio = { get estado() { return estado }, MODELOS, EFEITOS, trocarVista, renderizarArte }
+</script>
+</body>
+</html>
