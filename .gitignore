@@ -1,4 +1,8 @@
 .DS_Store
 *-projeto.json
 *-impressao-*.png
+*-arte-*.png
 *-mockup.png
+
+# Biblioteca de artes e mockups da marca: fica só no computador (o repositório é público)
+biblioteca/

@@ -5,16 +5,37 @@ aplique efeitos de texto e baixe o arquivo pronto para impressão.
 
 ## Como usar
 
-Abra o `index.html` no navegador (dois cliques basta). Não há nada para instalar. As fontes vêm do
-Google Fonts, então a primeira abertura precisa de internet.
+Dê dois cliques em **`abrir-estudio.command`**: ele abre o estúdio no navegador (em `http://127.0.0.1:8148`)
+já com a Biblioteca 148. Deixe a janela do Terminal aberta enquanto usa. Não há nada para instalar; as fontes
+vêm do Google Fonts, então a primeira abertura precisa de internet.
+
+Abrir o `index.html` direto também funciona; aí a biblioteca pede para você escolher a pasta `biblioteca`.
+
+> Se o macOS bloquear o `.command` na primeira vez, clique com o botão direito nele → **Abrir**.
+
+## Biblioteca 148 (artes e mockups do Drive)
+
+As artes e mockups da pasta **01 - ESTUDIO 148** do Google Drive ficam no botão **📚 Biblioteca 148**, separadas
+em *Artes* (fundo transparente), *Artes com fundo* e *Mockups*, por coleção, com busca. Clique numa arte para
+pôr na estampa, ou use **Como mockup** / **Logo**.
+
+- Para trazer artes novas do Drive: dois cliques em **`atualizar-biblioteca.command`**. Ele lê a pasta do Google
+  Drive para desktop, copia as imagens para `biblioteca/`, ignora repetidas e gera as miniaturas.
+- A pasta `biblioteca/` **não vai para o GitHub** (está no `.gitignore`): o repositório é público e as artes são
+  da marca. Ela fica só no seu computador.
+- Se o Drive estiver em outro lugar: `ESTUDIO148_ORIGEM="/caminho/da/pasta" python3 ferramentas/biblioteca.py`.
+- **Usar a paleta das artes 148** (no kit da marca) troca a paleta pelas cores tiradas das artes da biblioteca.
 
 ## O que tem
 
+- **Sem área fixa**: a estampa vai para qualquer lugar da camiseta, de qualquer tamanho: peito, manga, barra,
+  nuca, costas inteiras. Os botões de **Posição na camiseta** encaixam a camada num lugar comum já no tamanho
+  certo, e o painel mostra a medida real em centímetros. A área de 30×40 cm virou só uma guia opcional.
 - **Mockup realista**: camiseta com caimento, dobras, trama da malha, gola canelada, costuras e sombra, em
   frente e costas e 8 cores. A estampa "assenta" no tecido (pega as dobras e a luz), como num mockup de foto;
   o arquivo de impressão continua limpo. Dá para desligar em "Estampa assentada no tecido".
 - **Mockup com foto real**: envie a foto de uma camiseta lisa sua (ou gere uma com a IA), ajuste a área de
-  impressão e a estampa entra com as dobras daquela foto.
+  escala e a estampa entra com as dobras daquela foto. Os mockups da Biblioteca 148 também servem.
 - **Gerar com IA**: arte para estampa (fundo transparente), foto de mockup ou imagem livre, a partir de uma
   descrição ou de até 4 fotos de referência, usando a API de imagens da OpenAI (veja abaixo).
 - **Camadas**: texto, imagem e formas (círculo, retângulo, estrela, linha, anel), com ordem, ocultar e travar.
@@ -22,7 +43,7 @@ Google Fonts, então a primeira abertura precisa de internet.
   sombra 3D, brilho neon, degradê, espaçamento e itálico.
 - **Efeitos em um clique**: contorno duplo, sombra 3D, neon, retrô, vazado, vintage, degradê.
 - **Desgaste vintage** e **mesclagem** (multiplicar, tela, sobrepor, diferença) em qualquer camada.
-- **Alinhar** à área de impressão e guias que encaixam no centro ao arrastar.
+- **Centralizar** na camiseta e guias que encaixam no centro ao arrastar.
 - **Serigrafia**: tirar fundo branco, cor única, alto contraste e inverter imagens; o contador no topo mostra
   quantas cores (telas) a estampa tem ou avisa quando é melhor imprimir em DTF.
 - **Modelos 148**: número gigante, arco clássico, gótico, peito esquerdo, selo circular, empilhado, onda retrô, neon.
@@ -55,7 +76,9 @@ organização na OpenAI; se der erro 403, escolha outro modelo na lista.
 
 ## Exportar
 
-- **Baixar arte para impressão**: PNG transparente de 3600×4800 px (30×40 cm a 300 dpi).
+- **Baixar arte para impressão**: PNG transparente a 300 dpi, cortado exatamente na arte, com a medida em cm
+  no nome do arquivo. Se a vista tem estampas em lugares diferentes (peito e manga, por exemplo), sai **um arquivo
+  por lugar**, como a gráfica precisa.
 - **Baixar mockup**: PNG da camiseta com a estampa, para postar ou mostrar ao cliente.
 
 ## Atalhos

@@ -24,7 +24,8 @@
   button.perigo { color: var(--perigo); }
   button.ativo { border-color: var(--destaque); color: var(--destaque); }
   button.ia { background: linear-gradient(135deg, #8b5cf6, #ec4899); border: 0; color: #fff; font-weight: 800; width: 100%; padding: 10px; }
-  input[type=text], input[type=password], input[type=number], select, textarea { width: 100%; background: #0f0f13; border: 1px solid var(--borda); border-radius: 7px; padding: 6px 8px; }
+  button.bib { background: linear-gradient(135deg, #b8862e, #6b3f12); border: 0; color: #fff3dc; font-weight: 800; width: 100%; padding: 10px; margin-top: 8px; }
+  input[type=text], input[type=search], input[type=password], input[type=number], select, textarea { width: 100%; background: #0f0f13; border: 1px solid var(--borda); border-radius: 7px; padding: 6px 8px; }
   textarea { resize: vertical; min-height: 54px; }
   input[type=color] { width: 34px; height: 30px; padding: 0; border: 1px solid var(--borda); border-radius: 7px; background: none; cursor: pointer; }
   input[type=range] { width: 100%; accent-color: var(--destaque); }
@@ -55,17 +56,20 @@
   .paleta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   .chip { width: 24px; height: 24px; border-radius: 6px; border: 1px solid #444; cursor: pointer; }
   .nota { color: var(--suave); font-size: 11.5px; margin: 6px 0 0; }
+  .medida { display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 6px; background: #22222a; font-weight: 700; font-variant-numeric: tabular-nums; }
 
   main { position: relative; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 38%, #2a2a31 0%, #131316 62%, #0d0d0f 100%); }
   main.claro { background: radial-gradient(circle at 50% 38%, #f3f1ec 0%, #dcd8d0 70%, #c9c4ba 100%); }
-  #palco { --ar: 1000 / 1100; position: relative; aspect-ratio: var(--ar); width: min(640px, 92%); max-height: calc(100vh - 140px); }
-  #camisa, #fotoMockup { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #palco { --ar: 1000 / 1100; position: relative; aspect-ratio: var(--ar); width: min(660px, 92%); max-height: calc(100vh - 140px); }
+  #camisa, #fotoMockup, #arte { position: absolute; inset: 0; width: 100%; height: 100%; }
   #fotoMockup { object-fit: fill; border-radius: 6px; box-shadow: 0 20px 50px rgba(0,0,0,.45); }
-  #arte { position: absolute; touch-action: none; }
-  #areaGuia { position: absolute; border: 1px dashed rgba(232,255,58,.45); pointer-events: none; }
+  #arte { touch-action: none; }
+  #areaGuia { position: absolute; border: 1px dashed rgba(232,255,58,.55); pointer-events: none; }
+  #areaGuia span { position: absolute; top: -18px; left: 0; font-size: 10px; color: rgba(232,255,58,.8); white-space: nowrap; }
   .vista { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
   .dicaPalco { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); color: var(--suave); font-size: 12px; white-space: nowrap; }
   main.claro .dicaPalco { color: #6b675f; }
+  main.soltando::after { content: 'Solte a imagem para adicionar à estampa'; position: absolute; inset: 12px; display: grid; place-items: center; border: 2px dashed var(--destaque); border-radius: 16px; background: rgba(0,0,0,.55); color: var(--destaque); font-weight: 800; font-size: 16px; pointer-events: none; z-index: 5; }
 
   .camada { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--borda); border-radius: 8px; margin-bottom: 5px; cursor: pointer; background: #111115; }
   .camada.sel { border-color: var(--destaque); }
@@ -78,14 +82,14 @@
   .valor { color: var(--texto); font-weight: 700; float: right; text-transform: none; letter-spacing: 0; }
   .secao { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--borda); }
   .secao > .titulo { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--destaque); }
-  #aviso { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid var(--borda); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: .2s; pointer-events: none; z-index: 50; max-width: 80vw; }
+  #aviso { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid var(--borda); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: .2s; pointer-events: none; z-index: 60; max-width: 80vw; }
   #aviso.on { opacity: 1; }
   .check { display: flex; align-items: center; gap: 8px; color: var(--texto); text-transform: none; font-size: 13px; letter-spacing: 0; font-weight: 500; }
   .check input { width: auto; }
 
-  /* ── janela da IA ── */
-  #janelaIa { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); }
-  #janelaIa[hidden] { display: none; }
+  /* ── janelas ── */
+  .fundoJanela { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); }
+  .fundoJanela[hidden] { display: none; }
   .janela { width: min(940px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow: auto; background: var(--painel); border: 1px solid var(--borda); border-radius: 16px; display: grid; grid-template-columns: 360px 1fr; }
   .janela .lado { padding: 18px; }
   .janela .lado + .lado { border-left: 1px solid var(--borda); background: #121216; }
@@ -98,8 +102,8 @@
   .refs img { width: 100%; height: 100%; object-fit: cover; }
   .refs button { position: absolute; top: 2px; right: 2px; padding: 0 5px; font-size: 11px; background: rgba(0,0,0,.7); }
   #resultadosIa { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .resultado { border: 1px solid var(--borda); border-radius: 10px; overflow: hidden; background:
-    repeating-conic-gradient(#222 0 25%, #2c2c2c 0 50%) 0 0 / 18px 18px; }
+  .xadrez { background: repeating-conic-gradient(#222 0 25%, #2c2c2c 0 50%) 0 0 / 18px 18px; }
+  .resultado { border: 1px solid var(--borda); border-radius: 10px; overflow: hidden; }
   .resultado img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
   .resultado .acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px; background: var(--painel); }
   .resultado .acoes button { font-size: 11px; padding: 6px 4px; }
@@ -112,7 +116,28 @@
   .viaChat .titulo, .viaApi .titulo { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--destaque); }
   .viaChat { border-color: rgba(16, 163, 127, .55); }
   .viaChat .titulo { color: #34d399; }
-  main.soltando::after { content: 'Solte a imagem para adicionar à estampa'; position: absolute; inset: 12px; display: grid; place-items: center; border: 2px dashed var(--destaque); border-radius: 16px; background: rgba(0,0,0,.55); color: var(--destaque); font-weight: 800; font-size: 16px; pointer-events: none; z-index: 5; }
+
+  /* biblioteca */
+  .janelaBib { width: min(1180px, calc(100vw - 32px)); height: calc(100vh - 40px); background: var(--painel); border: 1px solid var(--borda); border-radius: 16px; display: grid; grid-template-rows: auto auto 1fr; overflow: hidden; }
+  .bibTopo { display: flex; align-items: center; gap: 12px; padding: 16px 18px 8px; }
+  .bibTopo h2 { margin: 0; font: 800 18px Unbounded, Inter, sans-serif; flex: 1; }
+  .bibFiltros { display: grid; grid-template-columns: auto 240px 1fr; gap: 10px; padding: 0 18px 12px; border-bottom: 1px solid var(--borda); align-items: center; }
+  .bibFiltros .abas { margin: 0; }
+  .bibFiltros .abas button { flex: 0 0 auto; white-space: nowrap; }
+  #gradeBib { overflow: auto; padding: 14px 18px 18px; }
+  .colecaoBib h4 { margin: 14px 0 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--suave); }
+  .colecaoBib:first-child h4 { margin-top: 0; }
+  .itensBib { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .itemBib { position: relative; border: 1px solid var(--borda); border-radius: 10px; overflow: hidden; background: #101014; cursor: pointer; }
+  .itemBib:hover { border-color: #b8862e; }
+  .itemBib .mini { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
+  .itemBib .rotulo { padding: 6px 8px; font-size: 11px; color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .itemBib .tipo { position: absolute; top: 6px; left: 6px; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 5px; background: rgba(0,0,0,.7); }
+  .itemBib .acoesBib { position: absolute; inset: auto 6px 34px 6px; display: none; gap: 4px; flex-wrap: wrap; }
+  .itemBib:hover .acoesBib { display: flex; }
+  .acoesBib button { flex: 1 1 auto; font-size: 11px; padding: 5px 4px; background: rgba(13,13,15,.92); }
+  .avisoBib { max-width: 560px; margin: 60px auto; text-align: center; color: var(--suave); }
+  .avisoBib b { color: var(--texto); }
 </style>
 </head>
 <body>
@@ -130,17 +155,19 @@
       <button id="abrir">Abrir projeto</button>
       <button id="salvar">Salvar projeto</button>
       <button id="exportarMockup">Baixar mockup</button>
-      <button id="exportarArte" class="primario" title="PNG transparente 3600×4800 (30×40 cm a 300 dpi)">Baixar arte para impressão</button>
+      <button id="exportarArte" class="primario" title="PNG transparente no tamanho real, a 300 dpi, recortado na arte">Baixar arte para impressão</button>
     </div>
     <input id="arquivoProjeto" type="file" accept=".json,application/json" hidden>
     <input id="arquivoImagem" type="file" accept="image/*" hidden>
     <input id="arquivoLogo" type="file" accept="image/*" hidden>
     <input id="arquivoFoto" type="file" accept="image/*" hidden>
     <input id="arquivoRefs" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
+    <input id="pastaBib" type="file" webkitdirectory multiple hidden>
   </header>
 
   <aside>
     <button class="ia" id="abrirIa">✨ Gerar com IA</button>
+    <button class="bib" id="abrirBib">📚 Biblioteca 148</button>
     <p class="nota">Copiou uma imagem do ChatGPT? Aperte <b>Ctrl+V</b> (ou <b>⌘V</b>) aqui. Também dá para arrastar uma imagem para a camiseta.</p>
 
     <h3>Adicionar</h3>
@@ -165,6 +192,7 @@
     <input id="marcaAno" type="text">
     <label>Paleta (clique pinta a camada · botão direito remove)</label>
     <div class="paleta" id="paleta"></div>
+    <button id="paleta148" style="width:100%;margin-top:6px">Usar a paleta das artes 148</button>
     <label>Logo</label>
     <div class="linha">
       <button id="enviarLogo">Enviar logo</button>
@@ -180,10 +208,10 @@
     <div id="palco">
       <svg id="camisa" viewBox="0 0 1000 1100" aria-hidden="true"></svg>
       <img id="fotoMockup" alt="" hidden>
-      <div id="areaGuia"></div>
+      <div id="areaGuia" hidden><span>área padrão 30×40 cm (só referência)</span></div>
       <canvas id="arte"></canvas>
     </div>
-    <div class="dicaPalco">Arraste para mover · alça ■ redimensiona · alça ● gira (Shift: de 15 em 15°) · Delete apaga · Ctrl+D duplica · setas ajustam</div>
+    <div class="dicaPalco">Coloque em qualquer lugar da camiseta · alça ■ redimensiona · alça ● gira (Shift: 15°) · Delete apaga · Ctrl+D duplica · setas ajustam</div>
   </main>
 
   <aside class="direita">
@@ -198,7 +226,7 @@
   </aside>
 </div>
 
-<div id="janelaIa" hidden>
+<div id="janelaIa" class="fundoJanela" hidden>
   <div class="janela" role="dialog" aria-labelledby="tituloIa">
     <div class="lado">
       <button class="fechar" id="fecharIa" title="Fechar (Esc)">✕</button>
@@ -230,23 +258,23 @@
       <div class="viaApi">
         <div class="titulo">Gerar aqui, pela API da OpenAI</div>
         <div id="blocoChave"></div>
-      <div class="grade2">
-        <div><label>Formato</label><select id="tamanhoIa">
-          <option value="1024x1024">Quadrado</option><option value="1024x1536">Retrato</option><option value="1536x1024">Paisagem</option>
-        </select></div>
-        <div><label>Qualidade</label><select id="qualidadeIa">
-          <option value="low">Rascunho (barato)</option><option value="medium" selected>Média</option><option value="high">Alta</option>
-        </select></div>
-        <div><label>Quantidade</label><select id="quantidadeIa"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
-        <div><label>Modelo</label><select id="modeloIa">
-          <option value="gpt-image-1.5">gpt-image-1.5</option>
-          <option value="gpt-image-2.5-flare">gpt-image-2.5-flare</option>
-          <option value="gpt-image-2.5-sunburst">gpt-image-2.5-sunburst</option>
-          <option value="gpt-image-2">gpt-image-2</option>
-          <option value="gpt-image-1">gpt-image-1</option>
-          <option value="gpt-image-1-mini">gpt-image-1-mini (barato)</option>
-        </select></div>
-      </div>
+        <div class="grade2">
+          <div><label>Formato</label><select id="tamanhoIa">
+            <option value="1024x1024">Quadrado</option><option value="1024x1536">Retrato</option><option value="1536x1024">Paisagem</option>
+          </select></div>
+          <div><label>Qualidade</label><select id="qualidadeIa">
+            <option value="low">Rascunho (barato)</option><option value="medium" selected>Média</option><option value="high">Alta</option>
+          </select></div>
+          <div><label>Quantidade</label><select id="quantidadeIa"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+          <div><label>Modelo</label><select id="modeloIa">
+            <option value="gpt-image-1.5">gpt-image-1.5</option>
+            <option value="gpt-image-2.5-flare">gpt-image-2.5-flare</option>
+            <option value="gpt-image-2.5-sunburst">gpt-image-2.5-sunburst</option>
+            <option value="gpt-image-2">gpt-image-2</option>
+            <option value="gpt-image-1">gpt-image-1</option>
+            <option value="gpt-image-1-mini">gpt-image-1-mini (barato)</option>
+          </select></div>
+        </div>
         <button class="primario" id="gerarIa" style="width:100%;margin-top:10px;padding:10px">Gerar pela API</button>
         <div id="erroIa"></div>
       </div>
@@ -256,17 +284,61 @@
     </div>
   </div>
 </div>
+
+<div id="janelaBib" class="fundoJanela" hidden>
+  <div class="janelaBib" role="dialog" aria-labelledby="tituloBib">
+    <div class="bibTopo">
+      <h2 id="tituloBib">📚 Biblioteca 148</h2>
+      <span class="nota" id="infoBib"></span>
+      <button id="fecharBib" title="Fechar (Esc)">✕</button>
+    </div>
+    <div class="bibFiltros">
+      <div class="abas" id="abasBib">
+        <button data-tipo="arte" class="ativo">Artes</button>
+        <button data-tipo="arteFundo">Artes com fundo</button>
+        <button data-tipo="mockup">Mockups</button>
+        <button data-tipo="todos">Tudo</button>
+      </div>
+      <select id="colecaoBib"></select>
+      <input type="search" id="buscaBib" placeholder="Buscar por nome ou coleção…">
+    </div>
+    <div id="gradeBib"></div>
+  </div>
+</div>
 <div id="aviso"></div>
 
 <script>
 'use strict'
-// ── constantes ───────────────────────────────────────────────────────────
-const PW = 3600, PH = 4800 // área de impressão: 30 × 40 cm a 300 dpi
-const AREA = { frente: { x: 335, y: 270, l: 330, a: 440 }, costas: { x: 335, y: 230, l: 330, a: 440 } } // no viewBox da camisa
+// ── medidas ──────────────────────────────────────────────────────────────
+// As camadas ficam em "px de impressão" (300 dpi) num espaço que cobre a camiseta inteira:
+// 1 unidade do desenho da camiseta (viewBox 1000×1100) = U px. O peito tem ~49 cm de largura.
+const U = 3600 / 330
+const PW = 3600, PH = 4800 // a área padrão 30×40 cm, que serve de referência
+const PX_CM = 300 / 2.54
+/** Lugares comuns de estampa, no desenho da camiseta (frente vista de frente; costas vistas de trás). */
+const POSICOES = {
+  frente: {
+    centro: { x: 335, y: 270, l: 330, a: 440, nome: 'Centro' },
+    peitoEsq: { x: 580, y: 262, l: 100, a: 100, nome: 'Peito esq.' },
+    peitoDir: { x: 320, y: 262, l: 100, a: 100, nome: 'Peito dir.' },
+    barra: { x: 585, y: 900, l: 110, a: 100, nome: 'Barra' },
+    mangaEsq: { x: 818, y: 278, l: 84, a: 84, nome: 'Manga esq.' },
+    mangaDir: { x: 98, y: 278, l: 84, a: 84, nome: 'Manga dir.' },
+  },
+  costas: {
+    centro: { x: 335, y: 230, l: 330, a: 440, nome: 'Costas' },
+    nuca: { x: 445, y: 120, l: 110, a: 66, nome: 'Nuca' },
+    barra: { x: 400, y: 905, l: 200, a: 100, nome: 'Barra' },
+    mangaEsq: { x: 98, y: 278, l: 84, a: 84, nome: 'Manga esq.' },
+    mangaDir: { x: 818, y: 278, l: 84, a: 84, nome: 'Manga dir.' },
+  },
+}
 const CORES_CAMISA = [
   ['Preta', '#141416'], ['Branca', '#f4f4f1'], ['Off-white', '#ece5d6'], ['Cinza mescla', '#9fa1a6'],
   ['Grafite', '#3b3c41'], ['Verde musgo', '#4c5438'], ['Marrom', '#5e4232'], ['Azul marinho', '#1d2539'],
 ]
+// cores dominantes das artes da Biblioteca 148: creme, preto, dourado, vermelho, marrom, azul-petróleo
+const PALETA_148 = ['#ead4af', '#0d0b09', '#c58431', '#a42d17', '#402c1b', '#2c434d']
 const FONTES = ['Anton', 'Bebas Neue', 'Archivo Black', 'Rubik Mono One', 'Bungee', 'Unbounded', 'UnifrakturCook', 'Pirata One', 'Permanent Marker', 'Monoton', 'Playfair Display', 'Space Grotesk', 'Inter']
 const MISTURAS = [['source-over', 'Normal'], ['multiply', 'Multiplicar'], ['screen', 'Tela'], ['overlay', 'Sobrepor'], ['difference', 'Diferença'], ['color-dodge', 'Subexposição']]
 const FORMAS_TEXTO = [['reto', 'Reto'], ['arco', 'Arco'], ['circulo', 'Círculo'], ['onda', 'Onda']]
@@ -279,11 +351,13 @@ let vista = 'frente'
 let selecionada = null
 let guias = []
 let realismo = true
+let mostrarArea = false
 const historico = [], refeito = []
 const imagens = new Map() // src → HTMLImageElement
 
 function estadoInicial() {
   return {
+    versao: 2,
     corCamisa: '#141416',
     marca: { nome: '148', frase: 'ORIGINAL DA RUA', ano: '2024', paleta: ['#ffffff', '#111113', '#e8ff3a', '#d7263d', '#ebe4d6'], logo: null },
     camadas: { frente: [], costas: [] },
@@ -293,6 +367,11 @@ function estadoInicial() {
 function migrar(e) {
   if (!e) return null
   e.fotos ??= { frente: null, costas: null }
+  if (!e.versao) {
+    // versão 1: camadas relativas à área 30×40; agora valem para a camiseta inteira
+    for (const v of ['frente', 'costas']) for (const c of e.camadas[v] ?? []) { c.x += POSICOES[v].centro.x * U; c.y += POSICOES[v].centro.y * U }
+    e.versao = 2
+  }
   for (const lista of Object.values(e.camadas)) for (const c of lista) if (c.tipo === 'texto') Object.assign(c, { ...padraoTexto(), ...c, modo: c.modo ?? (c.curva ? 'arco' : 'reto') })
   return e
 }
@@ -301,6 +380,10 @@ const uid = () => Math.random().toString(36).slice(2, 9)
 const camadas = () => estado.camadas[vista]
 const camadaSel = () => camadas().find(c => c.id === selecionada) ?? null
 const fotoAtual = () => estado.fotos?.[vista] ?? null
+const refAtual = () => POSICOES[vista].centro
+/** De coordenadas relativas à área 30×40 (como os modelos são escritos) para a camiseta. */
+const ax = v => refAtual().x * U + v
+const ay = v => refAtual().y * U + v
 
 function salvarHistorico() {
   historico.push(JSON.stringify(estado))
@@ -322,7 +405,7 @@ function padraoTexto() {
     contorno: 0, contornoCor: '#000000', contorno2: 0, contorno2Cor: '#e8ff3a',
     sombra: 0, sombraCor: '#000000', extrusao: 0, brilho: 0, italico: false }
 }
-function base() { return { id: uid(), x: PW / 2, y: PH / 2, rot: 0, escala: 1, opacidade: 1, desgaste: 0, mistura: 'source-over' } }
+function base() { return { id: uid(), x: ax(PW / 2), y: ay(PH / 2), rot: 0, escala: 1, opacidade: 1, desgaste: 0, mistura: 'source-over' } }
 function novoTexto(o = {}) {
   return { ...base(), tipo: 'texto', nome: 'Texto', texto: estado.marca.nome, ...padraoTexto(), cor: estado.marca.paleta[0], ...o }
 }
@@ -374,7 +457,6 @@ function letras(g, c) {
     }
     return saida
   }
-  // arco (curvatura em graus) ou círculo (raio fixo, centro na posição da camada)
   let r, cy, sentido
   if (c.modo === 'circulo') { r = Math.max(50, c.raio); cy = 0; sentido = c.embaixo ? -1 : 1 }
   else {
@@ -493,14 +575,14 @@ function desenharImagem(g, c) {
   if (img.complete && img.naturalWidth) g.drawImage(img, -c.l / 2, -c.a / 2, c.l, c.a)
 }
 
-/** Desenha as camadas de uma vista no contexto g (já escalado para coordenadas de impressão). */
-function desenharCamadas(g, lista, escala) {
+/** Desenha as camadas no contexto g; T leva da camiseta (px de impressão) aos pixels de g: { s, tx, ty }. */
+function desenharCamadas(g, lista, T) {
   const temp = document.createElement('canvas')
   temp.width = g.canvas.width; temp.height = g.canvas.height
   const t = temp.getContext('2d')
   for (const c of lista) {
     if (c.oculta) continue
-    t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, temp.width, temp.height); t.setTransform(escala, 0, 0, escala, 0, 0)
+    t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, temp.width, temp.height); t.setTransform(T.s, 0, 0, T.s, T.tx, T.ty)
     t.save()
     t.translate(c.x, c.y); t.rotate(c.rot * Math.PI / 180); t.scale(c.escala, c.escala)
     if (c.tipo === 'texto') desenharTexto(t, c)
@@ -512,7 +594,7 @@ function desenharCamadas(g, lista, escala) {
       t.globalCompositeOperation = 'destination-out'
       t.globalAlpha = c.desgaste
       const padrao = t.createPattern(texturaDesgaste, 'repeat')
-      padrao.setTransform(new DOMMatrix().scale(escala * 4, escala * 4))
+      padrao.setTransform(new DOMMatrix().scale(T.s * 4, T.s * 4))
       t.fillStyle = padrao; t.fillRect(0, 0, temp.width, temp.height)
       t.restore()
     }
@@ -524,8 +606,8 @@ function desenharCamadas(g, lista, escala) {
 }
 
 // ── realismo: a estampa assenta no tecido ───────────────────────────────
-// Dois mapas alinhados à área de impressão: "sombra" (branco = sem efeito, cinza = dobra escura)
-// multiplica a arte; "luz" (preto = sem efeito) clareia. Vêm das dobras do desenho ou da foto.
+// Dois mapas do tamanho da camiseta: "sombra" (branco = sem efeito) multiplica a arte; "luz" (preto = sem
+// efeito) clareia. Vêm das dobras do desenho ou da foto.
 const mapas = { chave: null, sombra: null, luz: null, carregando: null }
 const texturaMalha = criarMalha()
 
@@ -536,7 +618,6 @@ function criarMalha() {
   const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647
   for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
     const i = (y * 256 + x) * 4
-    // fios da malha: leve listra vertical + ruído
     const v = 238 + Math.sin(x * 2.1) * 6 + (rnd() - 0.5) * 22
     d.data[i] = d.data[i + 1] = d.data[i + 2] = Math.max(0, Math.min(255, v)); d.data[i + 3] = 255
   }
@@ -546,7 +627,7 @@ function criarMalha() {
 
 function chaveMapas() {
   const f = fotoAtual()
-  return f ? `foto:${f.src.length}:${f.src.slice(-40)}:${f.area.x}:${f.area.y}:${f.area.l}` : `svg:${vista}:${estado.corCamisa}`
+  return f ? `foto:${f.src.length}:${f.src.slice(-40)}` : `svg:${vista}:${estado.corCamisa}`
 }
 
 function prepararMapas() {
@@ -557,33 +638,37 @@ function prepararMapas() {
   const f = fotoAtual()
   if (f) {
     const img = imagemDe(f.src)
-    const fazer = () => pronto(...mapasDaFoto(img, f.area))
+    const fazer = () => pronto(...mapasDaFoto(img, f))
     if (img.complete && img.naturalWidth) fazer(); else img.addEventListener('load', fazer, { once: true })
     return
   }
-  const a = AREA[vista]
-  const svg = (fundo, conteudo) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${a.x} ${a.y} ${a.l} ${a.a}" width="660" height="880">
+  const svg = (fundo, conteudo) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1100" width="1000" height="1100">
     <defs>${filtrosSvg()}</defs><rect x="0" y="0" width="1000" height="1100" fill="${fundo}"/>${conteudo}</svg>`
   const d = dobras(vista, estado.corCamisa)
-  Promise.all([carregarSvg(svg('#ffffff', d.sombrasMapa)), carregarSvg(svg('#000000', d.luzesMapa))]).then(([s, l]) => pronto(s, l))
+  Promise.all([carregarSvg(svg('#ffffff', d.sombras)), carregarSvg(svg('#000000', d.luzes))]).then(([s, l]) => pronto(s, l))
 }
 
 function carregarSvg(texto) {
   return new Promise(ok => { const img = new Image(); img.onload = () => ok(img); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(texto) })
 }
 
-/** Mapas a partir da foto: o que é mais escuro que a média vira dobra; o que é mais claro, luz. */
-function mapasDaFoto(img, area) {
-  const L = 330, A = 440
+/** Mapas a partir da foto inteira: o que é mais escuro que a média da camiseta vira dobra; o mais claro, luz. */
+function mapasDaFoto(img, f) {
+  const L = 600, A = Math.round(600 * f.a / f.l)
   const t = document.createElement('canvas'); t.width = L; t.height = A
   const g = t.getContext('2d')
-  g.filter = 'blur(2.5px)' // tira o ruído da foto: só as dobras grandes contam
-  g.drawImage(img, area.x, area.y, area.l, area.l * 4 / 3, 0, 0, L, A)
+  g.filter = 'blur(2.5px)'
+  g.drawImage(img, 0, 0, L, A)
   const px = g.getImageData(0, 0, L, A).data
   const lum = new Float32Array(L * A)
-  let soma = 0
-  for (let i = 0; i < lum.length; i++) { lum[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255; soma += lum[i] }
-  const media = Math.max(0.02, soma / lum.length)
+  for (let i = 0; i < lum.length; i++) lum[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255
+  // média só dentro da área de referência (é onde está o tecido, não o fundo da foto)
+  const k = L / f.l
+  const x0 = Math.max(0, Math.floor(f.area.x * k)), y0 = Math.max(0, Math.floor(f.area.y * k))
+  const x1 = Math.min(L, Math.ceil((f.area.x + f.area.l) * k)), y1 = Math.min(A, Math.ceil((f.area.y + f.area.l * 4 / 3) * k))
+  let soma = 0, n = 0
+  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { soma += lum[y * L + x]; n++ }
+  const media = Math.max(0.02, n ? soma / n : 0.5)
   const fazer = fn => {
     const c = document.createElement('canvas'); c.width = L; c.height = A
     const cg = c.getContext('2d'), d = cg.createImageData(L, A)
@@ -592,13 +677,12 @@ function mapasDaFoto(img, area) {
     return c
   }
   return [
-    // em tecido escuro, diferenças pequenas viram razões grandes: atenua e limita a 50% de sombra
     fazer(v => 255 * Math.max(0.5, Math.min(1, 1 - 0.7 * (1 - v / media)))),
     fazer(v => 255 * Math.min(1, Math.max(0, (v - media) / Math.max(0.05, 1 - media)) * 0.55)),
   ]
 }
 
-/** Aplica dobras, luz e trama do tecido só onde há arte (o arquivo de impressão não passa por aqui). */
+/** Dobras, luz e trama do tecido só onde há arte (o arquivo de impressão não passa por aqui). */
 function aplicarTecido(g) {
   prepararMapas()
   if (!realismo || !mapas.sombra) return
@@ -610,7 +694,7 @@ function aplicarTecido(g) {
   g.drawImage(mapas.sombra, 0, 0, w, h)
   g.globalAlpha = 0.55
   const malha = g.createPattern(texturaMalha, 'repeat')
-  malha.setTransform(new DOMMatrix().scale(Math.max(0.35, w / 1400)))
+  malha.setTransform(new DOMMatrix().scale(Math.max(0.35, w / 3800)))
   g.fillStyle = malha; g.fillRect(0, 0, w, h)
   g.globalAlpha = 1
   g.globalCompositeOperation = 'screen'
@@ -620,48 +704,58 @@ function aplicarTecido(g) {
   g.restore()
 }
 
+/** No desenho da camiseta, a estampa não sai do tecido: recorta pelo contorno da peça. */
+function recortarNaCamisa(g, pxPorUnidade) {
+  if (fotoAtual()) return
+  g.save()
+  g.setTransform(pxPorUnidade, 0, 0, pxPorUnidade, 0, 0)
+  g.globalCompositeOperation = 'destination-in'
+  g.fill(new Path2D(contornoCamisa(vista)))
+  g.restore()
+}
+
 // ── tela ────────────────────────────────────────────────────────────────
-let escalaTela = 1
-function posicionarCanvas() {
-  const palco = document.getElementById('palco')
+let T = { s: 1, tx: 0, ty: 0 }
+
+/** Transformação da camiseta (px de impressão) para um canvas de `largura` px que cobre o palco inteiro. */
+function transformacao(largura) {
   const f = fotoAtual()
-  const foto = document.getElementById('fotoMockup')
-  document.getElementById('camisa').style.display = f ? 'none' : 'block'
+  if (!f) { const kb = largura / 1000; return { s: kb / U, tx: 0, ty: 0, kb } }
+  const kb = largura / f.l, ref = refAtual(), k = f.area.l / ref.l
+  return { s: kb * k / U, tx: kb * (f.area.x - ref.x * k), ty: kb * (f.area.y - ref.y * k), kb }
+}
+
+function posicionarCanvas() {
+  const palco = $('palco')
+  const f = fotoAtual()
+  const foto = $('fotoMockup')
+  $('camisa').style.display = f ? 'none' : 'block'
   foto.hidden = !f
-  let area, larguraBase
-  if (f) {
-    palco.style.setProperty('--ar', `${f.l} / ${f.a}`)
-    if (foto.getAttribute('src') !== f.src) foto.src = f.src
-    area = { x: f.area.x, y: f.area.y, l: f.area.l, a: f.area.l * 4 / 3 }
-    larguraBase = f.l
-  } else {
-    palco.style.setProperty('--ar', '1000 / 1100')
-    area = AREA[vista]; larguraBase = 1000
-  }
+  if (f) { palco.style.setProperty('--ar', `${f.l} / ${f.a}`); if (foto.getAttribute('src') !== f.src) foto.src = f.src }
+  else palco.style.setProperty('--ar', '1000 / 1100')
   const r = palco.getBoundingClientRect()
-  const k = r.width / larguraBase
-  const css = { left: area.x * k, top: area.y * k, width: area.l * k, height: area.a * k }
-  for (const el of [canvas, document.getElementById('areaGuia')]) Object.assign(el.style, { left: css.left + 'px', top: css.top + 'px', width: css.width + 'px', height: css.height + 'px' })
   const dpr = window.devicePixelRatio || 1
-  canvas.width = Math.max(1, Math.round(css.width * dpr)); canvas.height = Math.max(1, Math.round(css.height * dpr))
-  escalaTela = canvas.width / PW
-  document.getElementById('areaGuia').style.display = document.getElementById('mostrarGuia')?.checked === false ? 'none' : 'block'
-  // fundo de estúdio claro para camiseta escura (como nas fotos de produto), escuro para camiseta clara
-  document.getElementById('centro').classList.toggle('claro', !f && luminancia(estado.corCamisa) < 0.5)
+  canvas.width = Math.max(1, Math.round(r.width * dpr)); canvas.height = Math.max(1, Math.round(r.height * dpr))
+  T = transformacao(canvas.width)
+  // guia opcional da área padrão 30×40
+  const ref = refAtual(), k = T.s / dpr
+  Object.assign($('areaGuia').style, { left: (T.tx / dpr + ref.x * U * k) + 'px', top: (T.ty / dpr + ref.y * U * k) + 'px', width: ref.l * U * k + 'px', height: ref.a * U * k + 'px' })
+  $('areaGuia').hidden = !mostrarArea
+  $('centro').classList.toggle('claro', !f && luminancia(estado.corCamisa) < 0.5)
   desenhar()
 }
 
 function desenhar() {
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  ctx.setTransform(escalaTela, 0, 0, escalaTela, 0, 0)
-  desenharCamadas(ctx, camadas(), escalaTela)
+  desenharCamadas(ctx, camadas(), T)
   aplicarTecido(ctx)
-  ctx.setTransform(escalaTela, 0, 0, escalaTela, 0, 0)
+  recortarNaCamisa(ctx, T.kb)
+  ctx.setTransform(T.s, 0, 0, T.s, T.tx, T.ty)
   for (const gu of guias) {
-    ctx.save(); ctx.strokeStyle = '#ff3ad2'; ctx.lineWidth = 1.5 / escalaTela
+    ctx.save(); ctx.strokeStyle = '#ff3ad2'; ctx.lineWidth = 1.5 / T.s
     ctx.beginPath()
-    if (gu === 'v') { ctx.moveTo(PW / 2, 0); ctx.lineTo(PW / 2, PH) } else { ctx.moveTo(0, PH / 2); ctx.lineTo(PW, PH / 2) }
+    if (gu === 'v') { ctx.moveTo(500 * U, 0); ctx.lineTo(500 * U, 1100 * U) } else { const y = (refAtual().y + refAtual().a / 2) * U; ctx.moveTo(0, y); ctx.lineTo(1000 * U, y) }
     ctx.stroke(); ctx.restore()
   }
   const c = camadaSel()
@@ -675,10 +769,15 @@ function cantos(c) {
   const mx = (x0 + x1) / 2
   return { p, pts: [p(x0, y0), p(x1, y0), p(x1, y1), p(x0, y1)], alca: p(x1, y1), topo: p(mx, y0), giro: p(mx, y0 - 260 / c.escala) }
 }
+function limites(c) {
+  const { pts } = cantos(c)
+  const xs = pts.map(q => q.x), ys = pts.map(q => q.y)
+  return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }
+}
 
 function desenharSelecao(c) {
   const { pts, alca, giro, topo } = cantos(c)
-  const px = 1 / escalaTela
+  const px = 1 / T.s
   ctx.save()
   ctx.lineWidth = 1.5 * px; ctx.strokeStyle = '#e8ff3a'; ctx.setLineDash([6 * px, 4 * px])
   ctx.beginPath(); pts.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y))); ctx.closePath(); ctx.stroke()
@@ -728,14 +827,15 @@ function dobras(lado, cor) {
     <path d="M420 780 C445 850 432 930 455 1010" stroke="${s(.18)}" stroke-width="22" fill="none" filter="url(#f16)"/>
     <path d="M590 800 C572 870 592 940 572 1010" stroke="${s(.15)}" stroke-width="20" fill="none" filter="url(#f16)"/>
     <path d="M330 870 C358 935 350 985 368 1030" stroke="${s(.13)}" stroke-width="18" fill="none" filter="url(#f16)"/>
-    <path d="M500 660 C518 720 506 770 514 830" stroke="${s(.08)}" stroke-width="20" fill="none" filter="url(#f30)"/>`
+    <path d="M500 660 C518 720 506 770 514 830" stroke="${s(.08)}" stroke-width="20" fill="none" filter="url(#f30)"/>
+    <path d="M150 250 C140 300 128 350 118 400 M850 250 C860 300 872 350 882 400" stroke="${s(.25)}" stroke-width="16" fill="none" filter="url(#f16)"/>`
   const luzes = `
     <ellipse cx="420" cy="330" rx="150" ry="90" fill="rgba(255,255,255,${escuro ? .045 : .4})" filter="url(#f30)"/>
     <ellipse cx="610" cy="300" rx="120" ry="70" fill="rgba(255,255,255,${escuro ? .035 : .3})" filter="url(#f30)"/>
     <path d="M300 450 C340 520 360 580 395 650" stroke="rgba(255,255,255,${escuro ? .09 : .45})" stroke-width="22" fill="none" filter="url(#f16)"/>
     <path d="M700 450 C660 520 640 580 605 650" stroke="rgba(255,255,255,${escuro ? .09 : .45})" stroke-width="22" fill="none" filter="url(#f16)"/>
     <path d="M470 780 C480 850 475 920 492 1000" stroke="rgba(255,255,255,${escuro ? .07 : .35})" stroke-width="22" fill="none" filter="url(#f16)"/>`
-  return { sombras, luzes, sombrasMapa: sombras, luzesMapa: luzes }
+  return { sombras, luzes }
 }
 
 function svgCamisa(cor, lado) {
@@ -779,7 +879,7 @@ function svgCamisa(cor, lado) {
     <path d="${contorno}" fill="none" stroke="${borda}" stroke-width="1.5" opacity=".6"/>
     ${lado === 'frente' ? golaFrente : golaCostas}`
 }
-function desenharCamisa() { document.getElementById('camisa').innerHTML = svgCamisa(estado.corCamisa, vista) }
+function desenharCamisa() { $('camisa').innerHTML = svgCamisa(estado.corCamisa, vista) }
 
 // ── contador de cores (serigrafia) ──────────────────────────────────────
 function contarCores() {
@@ -802,7 +902,7 @@ function contarCores() {
     if (c.opacidade < 1 || (c.mistura && c.mistura !== 'source-over')) degrade = true
   }
   const n = cores.size
-  const el = document.getElementById('cores')
+  const el = $('cores')
   if (!camadas().length) el.innerHTML = '🎨 vazio'
   else if (colorida || degrade) el.innerHTML = `🎨 <b>${n}</b> cor${n === 1 ? '' : 'es'} + ${colorida ? 'imagem colorida' : 'degradê/transparência'} · melhor em <b>DTF</b>`
   else el.innerHTML = `🎨 <b>${n}</b> cor${n === 1 ? '' : 'es'} · serigrafia: <b>${n}</b> tela${n === 1 ? '' : 's'}`
@@ -810,9 +910,10 @@ function contarCores() {
 
 // ── interação no palco ──────────────────────────────────────────────────
 let arraste = null
-function paraImpressao(e) {
+function paraMundo(e) {
   const r = canvas.getBoundingClientRect()
-  return { x: (e.clientX - r.left) / r.width * PW, y: (e.clientY - r.top) / r.height * PH }
+  const dx = (e.clientX - r.left) * canvas.width / r.width, dy = (e.clientY - r.top) * canvas.height / r.height
+  return { x: (dx - T.tx) / T.s, y: (dy - T.ty) / T.s }
 }
 function dentro(c, p) {
   const { x0, y0, x1, y1 } = caixaLocal(c)
@@ -822,8 +923,8 @@ function dentro(c, p) {
   return x >= x0 && x <= x1 && y >= y0 && y <= y1
 }
 canvas.addEventListener('pointerdown', e => {
-  const p = paraImpressao(e)
-  const tol = 14 / escalaTela
+  const p = paraMundo(e)
+  const tol = 14 * (window.devicePixelRatio || 1) / T.s
   const c = camadaSel()
   if (c && !c.travada) {
     const { alca, giro } = cantos(c)
@@ -840,15 +941,16 @@ canvas.addEventListener('pointerdown', e => {
 })
 canvas.addEventListener('pointermove', e => {
   if (!arraste) return
-  const p = paraImpressao(e), c = arraste.c
+  const p = paraMundo(e), c = arraste.c
   guias = []
   if (arraste.modo === 'mover') {
     c.x = p.x - arraste.dx; c.y = p.y - arraste.dy
-    const ima = 12 / escalaTela
-    if (Math.abs(c.x - PW / 2) < ima) { c.x = PW / 2; guias.push('v') }
-    if (Math.abs(c.y - PH / 2) < ima) { c.y = PH / 2; guias.push('h') }
+    const ima = 10 * (window.devicePixelRatio || 1) / T.s
+    if (Math.abs(c.x - 500 * U) < ima) { c.x = 500 * U; guias.push('v') }
+    const meioRef = (refAtual().y + refAtual().a / 2) * U
+    if (Math.abs(c.y - meioRef) < ima) { c.y = meioRef; guias.push('h') }
   } else if (arraste.modo === 'escala') {
-    c.escala = Math.max(0.05, arraste.inicio * Math.hypot(p.x - c.x, p.y - c.y) / arraste.dist)
+    c.escala = Math.max(0.02, arraste.inicio * Math.hypot(p.x - c.x, p.y - c.y) / arraste.dist)
   } else {
     let ang = Math.atan2(p.y - c.y, p.x - c.x) * 180 / Math.PI + 90
     if (ang > 180) ang -= 360
@@ -856,13 +958,13 @@ canvas.addEventListener('pointermove', e => {
     else if (Math.abs(ang - Math.round(ang / 90) * 90) < 3) ang = Math.round(ang / 90) * 90
     c.rot = Math.round(ang)
   }
-  desenhar()
+  desenhar(); atualizarMedida()
 })
 canvas.addEventListener('pointerup', () => { if (arraste) { arraste = null; guias = []; mudou(false) } })
 
 window.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !$('janelaIa').hidden) { fecharIa(); return }
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) || !$('janelaIa').hidden) return
+  if (e.key === 'Escape') { if (!$('janelaIa').hidden) return fecharIa(); if (!$('janelaBib').hidden) return fecharBib() }
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) || !$('janelaIa').hidden || !$('janelaBib').hidden) return
   const c = camadaSel()
   const mod = e.metaKey || e.ctrlKey
   if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? refazer() : desfazer(); return }
@@ -889,18 +991,22 @@ function posAlterarEstado() {
   persistir(); desenharCamisa(); montarPainelCamisa(); montarMarca(); posicionarCanvas(); montarCamadas(); montarProps(); contarCores()
 }
 
-/** Alinha a camada à área de impressão pelo seu contorno real (já girado e escalado). */
-function alinhar(c, como) {
-  const { pts } = cantos(c)
-  const xs = pts.map(q => q.x), ys = pts.map(q => q.y)
-  const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys)
-  const margem = 120
-  if (como === 'esquerda') c.x += margem - minX
-  if (como === 'centroH') c.x += PW / 2 - (minX + maxX) / 2
-  if (como === 'direita') c.x += PW - margem - maxX
-  if (como === 'topo') c.y += margem - minY
-  if (como === 'centroV') c.y += PH / 2 - (minY + maxY) / 2
-  if (como === 'base') c.y += PH - margem - maxY
+/** Encaixa a camada num lugar comum da camiseta (peito, manga, nuca...), do tamanho dele. */
+function posicionar(c, chave) {
+  const r = POSICOES[vista][chave]
+  const alvo = { x: r.x * U, y: r.y * U, l: r.l * U, a: r.a * U }
+  let m = limites(c)
+  c.escala *= Math.min(alvo.l / (m.x1 - m.x0), alvo.a / (m.y1 - m.y0)) * 0.94
+  m = limites(c)
+  c.x += alvo.x + alvo.l / 2 - (m.x0 + m.x1) / 2
+  c.y += alvo.y + alvo.a / 2 - (m.y0 + m.y1) / 2
+}
+const medidaCm = c => { const m = limites(c); return [(m.x1 - m.x0) / PX_CM, (m.y1 - m.y0) / PX_CM] }
+function atualizarMedida() {
+  const c = camadaSel(), el = $('medidaCamada')
+  if (!c || !el) return
+  const [l, a] = medidaCm(c)
+  el.textContent = `${l.toFixed(1).replace('.', ',')} × ${a.toFixed(1).replace('.', ',')} cm`
 }
 
 // ── efeitos prontos de texto ────────────────────────────────────────────
@@ -909,9 +1015,9 @@ const EFEITOS = {
   'Contorno duplo': m => ({ ...LIMPO, contorno: 30, contornoCor: m.paleta[1], contorno2: 30, contorno2Cor: m.paleta[2] }),
   'Sombra 3D': m => ({ ...LIMPO, extrusao: 140, sombraCor: m.paleta[3], contorno: 18, contornoCor: m.paleta[1] }),
   'Neon': m => ({ ...LIMPO, brilho: 90, cor: m.paleta[2], contorno: 8, contornoCor: '#ffffff' }),
-  'Retrô': m => ({ ...LIMPO, contorno: 22, contornoCor: m.paleta[1], contorno2: 26, contorno2Cor: m.paleta[4], sombra: 90, sombraCor: m.paleta[3] }),
+  'Retrô': m => ({ ...LIMPO, contorno: 22, contornoCor: m.paleta[1], contorno2: 26, contorno2Cor: m.paleta[4] ?? m.paleta[0], sombra: 90, sombraCor: m.paleta[3] }),
   'Vazado': m => ({ ...LIMPO, preencherTexto: false, contorno: 14, contornoCor: m.paleta[0] }),
-  'Vintage': m => ({ ...LIMPO, cor: m.paleta[4], desgaste: 0.55 }),
+  'Vintage': m => ({ ...LIMPO, cor: m.paleta[0], desgaste: 0.55 }),
   'Degradê': m => ({ ...LIMPO, degrade: true, cor: m.paleta[2], cor2: m.paleta[3] }),
   'Limpar': () => ({ ...LIMPO }),
 }
@@ -934,6 +1040,8 @@ function processarImagem(c, processo) {
         if (processo === 'semFundo') {
           const sat = (Math.max(r, gg, b) - Math.min(r, gg, b)) / 255
           if (brilho > lim && sat < 0.15) px[i + 3] = Math.round(px[i + 3] * Math.max(0, (1 - brilho) / (1 - lim)))
+        } else if (processo === 'semFundoPreto') {
+          if (brilho < 1 - lim) px[i + 3] = Math.round(px[i + 3] * Math.max(0, brilho / (1 - lim)))
         } else if (processo === 'corUnica') {
           px[i + 3] = Math.round(px[i + 3] * Math.max(0, Math.min(1, (lim - brilho) / Math.max(0.05, lim) * 1.6)))
           px[i] = tr; px[i + 1] = tg; px[i + 2] = tb
@@ -954,24 +1062,25 @@ function processarImagem(c, processo) {
 }
 
 // ── painéis ─────────────────────────────────────────────────────────────
-const $ = id => document.getElementById(id)
-function aviso(t) { const a = $('aviso'); a.textContent = t; a.classList.add('on'); clearTimeout(aviso.t); aviso.t = setTimeout(() => a.classList.remove('on'), 2800) }
+function $(id) { return document.getElementById(id) }
+function aviso(t) { const a = $('aviso'); a.textContent = t; a.classList.add('on'); clearTimeout(aviso.t); aviso.t = setTimeout(() => a.classList.remove('on'), 3000) }
 const escapar = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch])
 
 function montarPainelCamisa() {
   const f = fotoAtual()
   const cores = `<div class="cores">${CORES_CAMISA.map(([n, c]) => `<button class="cor ${!f && c === estado.corCamisa ? 'ativo' : ''}" style="background:${c}" title="${n}" data-cor="${c}"></button>`).join('')}</div>`
   const foto = f ? `
-    <p class="nota">Usando uma foto como mockup desta vista. Ajuste onde a estampa fica:</p>
-    <label>Posição horizontal <span class="valor">${Math.round(f.area.x)}</span></label><input type="range" data-area="x" min="0" max="${f.l}" value="${f.area.x}">
-    <label>Posição vertical <span class="valor">${Math.round(f.area.y)}</span></label><input type="range" data-area="y" min="0" max="${f.a}" value="${f.area.y}">
-    <label>Tamanho da área <span class="valor">${Math.round(f.area.l)}</span></label><input type="range" data-area="l" min="${Math.round(f.l * 0.08)}" max="${Math.round(f.l * 0.9)}" value="${f.area.l}">
+    <p class="nota">Foto como mockup. Calibre a escala com os controles abaixo até o retângulo tracejado ficar do tamanho de uma área de 30×40 cm no peito da camiseta da foto. A estampa pode ir para qualquer lugar da foto.</p>
+    <label>Horizontal <span class="valor">${Math.round(f.area.x)}</span></label><input type="range" data-area="x" min="0" max="${f.l}" value="${f.area.x}">
+    <label>Vertical <span class="valor">${Math.round(f.area.y)}</span></label><input type="range" data-area="y" min="0" max="${f.a}" value="${f.area.y}">
+    <label>Escala (largura dos 30 cm) <span class="valor">${Math.round(f.area.l)}</span></label><input type="range" data-area="l" min="${Math.round(f.l * 0.08)}" max="${Math.round(f.l * 0.9)}" value="${f.area.l}">
     <div class="grade2" style="margin-top:10px"><button data-foto="trocar">Trocar foto</button><button data-foto="remover" class="perigo">Voltar ao desenho</button></div>`
     : `<div class="grade2" style="margin-top:10px"><button data-foto="enviar">📷 Usar foto real</button><button data-foto="ia">✨ Gerar foto</button></div>
-       <p class="nota">Envie a foto de uma camiseta lisa sua (de frente, bem iluminada) para um mockup real.</p>`
+       <p class="nota">Ou escolha um mockup na Biblioteca 148.</p>`
   $('painelCamisa').innerHTML = cores + foto + `
     <label class="check" style="margin-top:10px"><input type="checkbox" id="realismo" ${realismo ? 'checked' : ''}> Estampa assentada no tecido (dobras e trama)</label>
-    <label class="check" style="margin-top:6px"><input type="checkbox" id="mostrarGuia" ${$('mostrarGuia')?.checked === false ? '' : 'checked'}> Mostrar área de impressão</label>`
+    <label class="check" style="margin-top:6px"><input type="checkbox" id="mostrarGuia" ${mostrarArea || f ? 'checked' : ''} ${f ? 'disabled' : ''}> Mostrar área padrão 30×40 (só referência)</label>`
+  if (f) { mostrarArea = true }
 }
 $('painelCamisa').addEventListener('click', e => {
   const cor = e.target.closest('[data-cor]')
@@ -982,7 +1091,7 @@ $('painelCamisa').addEventListener('click', e => {
   }
   const acao = e.target.closest('[data-foto]')?.dataset.foto
   if (acao === 'enviar' || acao === 'trocar') $('arquivoFoto').click()
-  if (acao === 'remover') { salvarHistorico(); estado.fotos[vista] = null; persistir(); montarPainelCamisa(); posicionarCanvas() }
+  if (acao === 'remover') { salvarHistorico(); estado.fotos[vista] = null; mostrarArea = false; persistir(); montarPainelCamisa(); posicionarCanvas() }
   if (acao === 'ia') abrirIa('mockup')
 })
 $('painelCamisa').addEventListener('input', e => {
@@ -990,17 +1099,18 @@ $('painelCamisa').addEventListener('input', e => {
   if (k) {
     const f = fotoAtual(); f.area[k] = Number(e.target.value)
     e.target.previousElementSibling.querySelector('.valor').textContent = Math.round(f.area[k])
-    persistir(); posicionarCanvas(); return
+    mapas.chave = null; persistir(); posicionarCanvas(); return
   }
   if (e.target.id === 'realismo') { realismo = e.target.checked; desenhar() }
-  if (e.target.id === 'mostrarGuia') posicionarCanvas()
+  if (e.target.id === 'mostrarGuia') { mostrarArea = e.target.checked; posicionarCanvas() }
 })
 
 function usarFotoMockup(src, l, a) {
   salvarHistorico()
   estado.fotos[vista] = { src, l, a, area: { x: l * 0.33, y: a * (vista === 'frente' ? 0.24 : 0.2), l: l * 0.34 } }
+  mostrarArea = true
   persistir(); montarPainelCamisa(); posicionarCanvas()
-  aviso('Foto usada como mockup. Ajuste a área de impressão no painel da direita.')
+  aviso('Foto usada como mockup. Calibre a área 30×40 no painel da direita para as medidas ficarem certas.')
 }
 $('arquivoFoto').onchange = async e => {
   const f = e.target.files[0]; if (!f) return
@@ -1020,7 +1130,7 @@ function montarCamadas() {
       <button data-acao="descer" title="Para trás">↓</button>
       <button data-acao="ver" title="Mostrar/ocultar">${c.oculta ? '◌' : '👁'}</button>
       <button data-acao="travar" title="Travar">${c.travada ? '🔒' : '🔓'}</button>
-    </div>`).join('') : '<p class="vazio">Nada nesta vista ainda. Use um modelo, a IA ou adicione um texto.</p>'
+    </div>`).join('') : '<p class="vazio">Nada nesta vista ainda. Use a Biblioteca, um modelo, a IA ou adicione um texto.</p>'
 }
 $('camadas').addEventListener('click', e => {
   const linha = e.target.closest('.camada'); if (!linha) return
@@ -1051,12 +1161,15 @@ const secao = (titulo, html) => `<div class="secao"><div class="titulo">${titulo
 function montarProps() {
   const c = camadaSel()
   if (!c) { $('props').innerHTML = '<p class="vazio">Selecione uma camada para editar.</p>'; return }
-  const alinhamento = secao('Alinhar na área', `<div class="grade3" style="margin-top:8px">
-      <button data-alinhar="esquerda" title="Esquerda">⇤</button><button data-alinhar="centroH" title="Centro horizontal">↔</button><button data-alinhar="direita" title="Direita">⇥</button>
-      <button data-alinhar="topo" title="Topo">⤒</button><button data-alinhar="centroV" title="Centro vertical">↕</button><button data-alinhar="base" title="Base">⤓</button></div>`)
+  const lugares = Object.entries(POSICOES[vista]).map(([k, p]) => `<button data-posicao="${k}">${p.nome}</button>`).join('')
+  const posicao = secao('Posição na camiseta', `
+    <div><span class="medida" id="medidaCamada"></span> <span class="nota">tamanho real</span></div>
+    <div class="grade3" style="margin-top:8px">${lugares}</div>
+    <div class="grade2" style="margin-top:6px"><button data-alinhar="meio">↔ Centralizar</button><button data-alinhar="original">1:1 da imagem</button></div>
+    <p class="nota">Arraste para qualquer lugar; os botões encaixam no tamanho de cada lugar.</p>`)
   const comum = secao('Camada', `
     ${controle('faixa', 'rot', 'Rotação', { min: -180, max: 180 })}
-    ${controle('faixa', 'escala', 'Tamanho', { min: 0.05, max: 4, passo: 0.01 })}
+    ${controle('faixa', 'escala', 'Tamanho', { min: 0.02, max: 6, passo: 0.01 })}
     ${controle('faixa', 'opacidade', 'Opacidade', { min: 0, max: 1, passo: 0.01 })}
     ${controle('selecao', 'mistura', 'Mesclagem', { opcoes: MISTURAS })}
     ${controle('faixa', 'desgaste', 'Desgaste (vintage)', { min: 0, max: 1, passo: 0.01 })}
@@ -1091,22 +1204,25 @@ function montarProps() {
       <div class="linha">${controle('cor', 'cor', 'Cor')}${controle('cor', 'contornoCor', 'Cor do contorno')}</div>
       ${controle('check', 'preencher', 'Preencher')}
       ${controle('faixa', 'contorno', 'Contorno', { min: 0, max: 200 })}
-      ${controle('faixa', 'l', 'Largura', { min: 20, max: PW })}
-      ${controle('faixa', 'a', 'Altura', { min: 10, max: PH })}
+      ${controle('faixa', 'l', 'Largura', { min: 20, max: 7000 })}
+      ${controle('faixa', 'a', 'Altura', { min: 10, max: 9000 })}
       ${c.forma === 'retangulo' ? controle('faixa', 'raioCanto', 'Cantos arredondados', { min: 0, max: 700 }) : ''}`)
   } else {
-    especifico = secao('Preparar para serigrafia', `
+    especifico = secao('Preparar para impressão', `
       <div class="grade2" style="margin-top:8px">
         <button data-processo="semFundo">Tirar fundo branco</button>
+        <button data-processo="semFundoPreto">Tirar fundo preto</button>
         <button data-processo="corUnica">Cor única</button>
         <button data-processo="contraste">Alto contraste</button>
         <button data-processo="inverter">Inverter</button>
+        <button data-processo="restaurar">Restaurar original</button>
       </div>
       <label>Cor da tinta (para “cor única”)</label>
-      <div class="linha">${controle('cor', 'tinta', 'Tinta')}<button data-processo="restaurar">Restaurar original</button></div>
+      <div class="linha">${controle('cor', 'tinta', 'Tinta')}</div>
       ${controle('faixa', 'limiar', 'Sensibilidade', { min: 0.3, max: 0.98, passo: 0.01 })}`)
   }
-  $('props').innerHTML = especifico + alinhamento + comum
+  $('props').innerHTML = posicao + especifico + comum
+  atualizarMedida()
 }
 
 $('props').addEventListener('input', e => {
@@ -1116,7 +1232,7 @@ $('props').addEventListener('input', e => {
   c[k] = el.type === 'checkbox' ? el.checked : el.type === 'range' ? Number(el.value) : el.value
   const rotulo = $('props').querySelector(`[data-valor="${k}"]`)
   if (rotulo) rotulo.textContent = formatarValor(k, c[k])
-  persistir(); desenhar(); contarCores()
+  persistir(); desenhar(); contarCores(); atualizarMedida()
   if (k === 'texto') montarCamadas()
   if (el.dataset.recriar) { delete $('props').dataset.editando; montarProps() }
 })
@@ -1126,13 +1242,21 @@ $('props').addEventListener('click', async e => {
   const b = e.target.closest('button'); if (!b) return
   if (b.dataset.acao === 'duplicar') return duplicar(c)
   if (b.dataset.acao === 'apagar') return remover(c.id)
-  if (b.dataset.alinhar) { salvarHistorico(); alinhar(c, b.dataset.alinhar); return mudou(false) }
+  if (b.dataset.posicao) { salvarHistorico(); posicionar(c, b.dataset.posicao); return mudou(false) }
+  if (b.dataset.alinhar === 'meio') { salvarHistorico(); const m = limites(c); c.x += 500 * U - (m.x0 + m.x1) / 2; return mudou(false) }
+  if (b.dataset.alinhar === 'original') {
+    // tamanho em que a imagem fica com 300 dpi: 1 pixel da imagem = 1 px de impressão
+    if (c.tipo !== 'imagem') return aviso('Só vale para imagens.')
+    const img = imagemDe(c.src); if (!img.naturalWidth) return
+    salvarHistorico(); c.escala = img.naturalWidth / c.l; mudou(false)
+    const [l, a] = medidaCm(c); return aviso(`Na resolução original a 300 dpi, a imagem mede ${l.toFixed(1)} × ${a.toFixed(1)} cm.`)
+  }
   if (b.dataset.efeito) { salvarHistorico(); Object.assign(c, EFEITOS[b.dataset.efeito](estado.marca)); return mudou(false) }
   if (b.dataset.processo) {
     salvarHistorico(); b.disabled = true
     await processarImagem(c, b.dataset.processo)
     mudou(false)
-    aviso({ semFundo: 'Fundo branco removido.', corUnica: 'Imagem em uma cor só: pronta para uma tela de serigrafia.', contraste: 'Alto contraste aplicado.', inverter: 'Cores invertidas.', restaurar: 'Imagem original de volta.' }[b.dataset.processo])
+    aviso({ semFundo: 'Fundo branco removido.', semFundoPreto: 'Fundo preto removido.', corUnica: 'Imagem em uma cor só: pronta para uma tela de serigrafia.', contraste: 'Alto contraste aplicado.', inverter: 'Cores invertidas.', restaurar: 'Imagem original de volta.' }[b.dataset.processo])
   }
 })
 
@@ -1160,6 +1284,7 @@ $('paleta').addEventListener('contextmenu', e => {
   e.preventDefault(); salvarHistorico(); estado.marca.paleta.splice(Number(chip.dataset.i), 1); persistir(); montarMarca()
 })
 $('paleta').addEventListener('change', e => { if (e.target.id === 'novaCor') { salvarHistorico(); estado.marca.paleta.push(e.target.value); persistir(); montarMarca() } })
+$('paleta148').onclick = () => { salvarHistorico(); estado.marca.paleta = [...PALETA_148]; persistir(); montarMarca(); aviso('Paleta das artes 148: creme, preto, dourado, vermelho, marrom e azul-petróleo.') }
 
 /** Lê um arquivo de imagem; com `maximo`, reduz o lado maior para caber (fotos de celular são enormes). */
 function lerImagem(arquivo, maximo = 0) {
@@ -1188,49 +1313,50 @@ $('arquivoLogo').onchange = async e => {
   salvarHistorico(); estado.marca.logo = await lerImagem(f); persistir(); aviso('Logo salvo no kit da marca.'); e.target.value = ''
 }
 $('usarLogo').onclick = () => {
-  const logo = estado.marca.logo; if (!logo) return aviso('Envie o logo primeiro.')
+  const logo = estado.marca.logo; if (!logo) return aviso('Envie o logo primeiro (ou escolha um na Biblioteca 148).')
   adicionar(novaImagem(logo.src, logo.l, logo.a, { nome: 'Logo' }))
 }
 
 // ── modelos ─────────────────────────────────────────────────────────────
+// Coordenadas dos modelos relativas à área 30×40 (ax/ay levam para a camiseta).
 const MODELOS = [
   { nome: 'Número gigante', icone: '148', fonte: 'Anton', criar: m => [
-    novoTexto({ texto: m.nome, tamanho: 2300, y: 2050, espacamento: -40 }),
-    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 260, y: 3500, espacamento: 60 }),
-    novoTexto({ texto: `EST. ${m.ano}`, fonte: 'Space Grotesk', peso: 700, tamanho: 170, y: 3850, espacamento: 120, cor: m.paleta[2] }),
+    novoTexto({ texto: m.nome, tamanho: 2300, y: ay(2050), espacamento: -40 }),
+    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 260, y: ay(3500), espacamento: 60 }),
+    novoTexto({ texto: `EST. ${m.ano}`, fonte: 'Space Grotesk', peso: 700, tamanho: 170, y: ay(3850), espacamento: 120, cor: m.paleta[2] }),
   ] },
   { nome: 'Arco clássico', icone: '⌒', fonte: 'Archivo Black', criar: m => [
-    novoTexto({ texto: `${m.nome} CLOTHING`, fonte: 'Archivo Black', tamanho: 430, modo: 'arco', curva: 120, y: 1500, espacamento: 30 }),
-    novaForma('estrela', { l: 900, a: 900, y: 2500, cor: m.paleta[2] }),
-    novoTexto({ texto: `DESDE ${m.ano}`, fonte: 'Archivo Black', tamanho: 300, modo: 'arco', curva: -90, y: 3500, espacamento: 40 }),
+    novoTexto({ texto: `${m.nome} CLOTHING`, fonte: 'Archivo Black', tamanho: 430, modo: 'arco', curva: 120, y: ay(1500), espacamento: 30 }),
+    novaForma('estrela', { l: 900, a: 900, y: ay(2500), cor: m.paleta[2] }),
+    novoTexto({ texto: `DESDE ${m.ano}`, fonte: 'Archivo Black', tamanho: 300, modo: 'arco', curva: -90, y: ay(3500), espacamento: 40 }),
   ] },
   { nome: 'Gótico', icone: '𝔊', fonte: 'UnifrakturCook', criar: m => [
-    novoTexto({ texto: m.nome, fonte: 'UnifrakturCook', peso: 700, tamanho: 1900, y: 2100, contorno: 40, contornoCor: m.paleta[1], sombra: 90, sombraCor: m.paleta[3] }),
-    novoTexto({ texto: m.frase, fonte: 'UnifrakturCook', peso: 700, tamanho: 330, y: 3400 }),
+    novoTexto({ texto: m.nome, fonte: 'UnifrakturCook', peso: 700, tamanho: 1900, y: ay(2100), contorno: 40, contornoCor: m.paleta[1], sombra: 90, sombraCor: m.paleta[3] }),
+    novoTexto({ texto: m.frase, fonte: 'UnifrakturCook', peso: 700, tamanho: 330, y: ay(3400) }),
   ] },
   { nome: 'Peito esquerdo', icone: '▘', fonte: 'Unbounded', vista: 'frente', criar: m => [
-    novoTexto({ texto: m.nome, fonte: 'Unbounded', peso: 800, tamanho: 420, x: 2650, y: 900 }),
-    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 110, x: 2650, y: 1230, espacamento: 30 }),
+    novoTexto({ texto: m.nome, fonte: 'Unbounded', peso: 800, tamanho: 420, x: ax(2650), y: ay(900) }),
+    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 110, x: ax(2650), y: ay(1230), espacamento: 30 }),
   ] },
   { nome: 'Selo circular', icone: '◎', fonte: 'Bebas Neue', criar: m => [
-    novaForma('anel', { l: 2600, a: 2600, y: 2400, contorno: 60, contornoCor: m.paleta[0] }),
-    novaForma('anel', { l: 1900, a: 1900, y: 2400, contorno: 20, contornoCor: m.paleta[0] }),
-    novoTexto({ texto: m.frase, fonte: 'Bebas Neue', tamanho: 260, modo: 'circulo', raio: 1110, y: 2400, espacamento: 40 }),
-    novoTexto({ texto: `EST. ${m.ano}`, fonte: 'Bebas Neue', tamanho: 220, modo: 'circulo', raio: 1110, embaixo: true, y: 2400, espacamento: 60, cor: m.paleta[2] }),
-    novoTexto({ texto: m.nome, fonte: 'Bebas Neue', tamanho: 1000, y: 2420 }),
+    novaForma('anel', { l: 2600, a: 2600, y: ay(2400), contorno: 60, contornoCor: m.paleta[0] }),
+    novaForma('anel', { l: 1900, a: 1900, y: ay(2400), contorno: 20, contornoCor: m.paleta[0] }),
+    novoTexto({ texto: m.frase, fonte: 'Bebas Neue', tamanho: 260, modo: 'circulo', raio: 1110, y: ay(2400), espacamento: 40 }),
+    novoTexto({ texto: `EST. ${m.ano}`, fonte: 'Bebas Neue', tamanho: 220, modo: 'circulo', raio: 1110, embaixo: true, y: ay(2400), espacamento: 60, cor: m.paleta[2] }),
+    novoTexto({ texto: m.nome, fonte: 'Bebas Neue', tamanho: 1000, y: ay(2420) }),
   ] },
   { nome: 'Empilhado', icone: '≡', fonte: 'Bebas Neue', criar: m => [
-    novoTexto({ texto: m.frase.split(' ').join('\n'), fonte: 'Bebas Neue', tamanho: 900, altura: 0.88, y: 1900, desgaste: 0.45 }),
-    novaForma('linha', { l: 2800, a: 40, y: 3420 }),
-    novoTexto({ texto: `${m.nome} — ${m.ano}`, fonte: 'Space Grotesk', peso: 700, tamanho: 220, y: 3700, espacamento: 90 }),
+    novoTexto({ texto: m.frase.split(' ').join('\n'), fonte: 'Bebas Neue', tamanho: 900, altura: 0.88, y: ay(1900), desgaste: 0.45 }),
+    novaForma('linha', { l: 2800, a: 40, y: ay(3420) }),
+    novoTexto({ texto: `${m.nome} — ${m.ano}`, fonte: 'Space Grotesk', peso: 700, tamanho: 220, y: ay(3700), espacamento: 90 }),
   ] },
   { nome: 'Onda retrô', icone: '〰', fonte: 'Rubik Mono One', criar: m => [
-    novoTexto({ texto: m.nome, fonte: 'Rubik Mono One', tamanho: 1100, modo: 'onda', amplitude: 220, frequencia: 1, y: 2000, ...EFEITOS['Retrô'](m) }),
-    novoTexto({ texto: m.frase, fonte: 'Rubik Mono One', tamanho: 200, y: 3300, espacamento: 30, cor: m.paleta[4] }),
+    novoTexto({ texto: m.nome, fonte: 'Rubik Mono One', tamanho: 1100, modo: 'onda', amplitude: 220, frequencia: 1, y: ay(2000), ...EFEITOS['Retrô'](m) }),
+    novoTexto({ texto: m.frase, fonte: 'Rubik Mono One', tamanho: 200, y: ay(3300), espacamento: 30, cor: m.paleta[0] }),
   ] },
   { nome: 'Neon', icone: '✺', fonte: 'Monoton', criar: m => [
-    novoTexto({ texto: m.nome, fonte: 'Monoton', tamanho: 1500, y: 2100, ...EFEITOS['Neon'](m) }),
-    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 220, y: 3300, espacamento: 80, cor: m.paleta[0] }),
+    novoTexto({ texto: m.nome, fonte: 'Monoton', tamanho: 1500, y: ay(2100), ...EFEITOS['Neon'](m) }),
+    novoTexto({ texto: m.frase, fonte: 'Space Grotesk', peso: 700, tamanho: 220, y: ay(3300), espacamento: 80, cor: m.paleta[0] }),
   ] },
 ]
 $('modelos').innerHTML = MODELOS.map((m, i) => `<button class="modelo" data-i="${i}"><span><b style="font-family:'${m.fonte}'">${m.icone}</b>${m.nome}</span></button>`).join('')
@@ -1245,6 +1371,119 @@ $('modelos').addEventListener('click', e => {
   selecionada = novas[novas.length - 1].id
   mudou(false)
   aviso(`Modelo “${m.nome}” adicionado. Edite os textos no painel da direita.`)
+})
+
+// ── Biblioteca 148 (artes e mockups do Drive) ───────────────────────────
+// biblioteca/biblioteca.json é gerado por ferramentas/biblioteca.py (atualizar-biblioteca.command).
+// Pelo abrir-estudio.command as imagens vêm por http; abrindo o arquivo direto, escolhe-se a pasta.
+const bib = { indice: null, arquivos: null, tipo: 'arte', colecao: '', busca: '' }
+const normalizar = t => String(t).normalize('NFC')
+
+async function carregarBiblioteca() {
+  if (bib.indice) return true
+  if (location.protocol.startsWith('http')) {
+    try { const r = await fetch('biblioteca/biblioteca.json', { cache: 'no-store' }); if (r.ok) { bib.indice = await r.json(); return true } } catch {}
+  }
+  return false
+}
+const urlDe = caminho => bib.arquivos ? bib.arquivos.get(normalizar(caminho)) : caminho.split('/').map(encodeURIComponent).join('/')
+// a pasta escolhida à mão pode vir sem a .miniaturas (oculta): aí mostra a imagem original
+const miniaturaDe = item => urlDe(item.miniatura) ?? urlDe(item.arquivo)
+
+async function abrirBib() {
+  $('janelaBib').hidden = false
+  if (!(await carregarBiblioteca())) {
+    $('gradeBib').innerHTML = `<div class="avisoBib">
+      <p><b>A biblioteca ainda não está disponível nesta janela.</b></p>
+      <p>Abra o estúdio com dois cliques em <b>abrir-estudio.command</b> (pasta do 148 Estúdio). Assim as artes do Drive aparecem aqui sozinhas.</p>
+      <p>Ou escolha a pasta <b>biblioteca</b> agora:</p>
+      <button id="escolherPastaBib" class="primario">Escolher a pasta “biblioteca”</button>
+      <p class="nota">Se ela ainda não existe, dê dois cliques em <b>atualizar-biblioteca.command</b>: ele copia as artes do Google Drive.</p></div>`
+    $('escolherPastaBib').onclick = () => $('pastaBib').click()
+    return
+  }
+  montarFiltrosBib(); montarBib()
+}
+function fecharBib() { $('janelaBib').hidden = true }
+$('abrirBib').onclick = abrirBib
+$('fecharBib').onclick = fecharBib
+$('janelaBib').addEventListener('click', e => { if (e.target.id === 'janelaBib') fecharBib() })
+$('pastaBib').onchange = async e => {
+  const arquivos = [...e.target.files]
+  const mapa = new Map()
+  for (const f of arquivos) {
+    const rel = normalizar(f.webkitRelativePath)
+    // aceita a própria pasta "biblioteca" ou a pasta do estúdio inteira
+    const k = rel.indexOf('biblioteca/')
+    const caminho = k >= 0 ? rel.slice(k) : 'biblioteca/' + rel.split('/').slice(1).join('/')
+    mapa.set(caminho, URL.createObjectURL(f))
+  }
+  const indice = arquivos.find(f => f.name === 'biblioteca.json')
+  if (!indice) return aviso('Essa pasta não tem o biblioteca.json. Rode o atualizar-biblioteca.command primeiro.')
+  bib.indice = JSON.parse(await indice.text())
+  bib.arquivos = mapa
+  montarFiltrosBib(); montarBib()
+}
+
+function itensBib() {
+  const todos = bib.indice.colecoes.flatMap(c => c.itens)
+  return todos.filter(i => (bib.tipo === 'todos' || i.tipo === bib.tipo) && (!bib.colecao || i.colecao === bib.colecao) &&
+    (!bib.busca || normalizar(`${i.nome} ${i.colecao}`).toLowerCase().includes(normalizar(bib.busca).toLowerCase())))
+}
+function montarFiltrosBib() {
+  const n = bib.indice.colecoes.reduce((s, c) => s + c.itens.length, 0)
+  $('infoBib').textContent = `${n} imagens · ${bib.indice.colecoes.length} coleções · atualizada em ${bib.indice.geradoEm}`
+  $('colecaoBib').innerHTML = `<option value="">Todas as coleções</option>` + bib.indice.colecoes.map(c => `<option ${c.nome === bib.colecao ? 'selected' : ''}>${escapar(c.nome)}</option>`).join('')
+}
+const ROTULO_TIPO = { arte: 'ARTE', arteFundo: 'COM FUNDO', mockup: 'MOCKUP' }
+function montarBib() {
+  for (const b of $('abasBib').children) b.classList.toggle('ativo', b.dataset.tipo === bib.tipo)
+  const itens = itensBib()
+  const porColecao = new Map()
+  for (const i of itens) { if (!porColecao.has(i.colecao)) porColecao.set(i.colecao, []); porColecao.get(i.colecao).push(i) }
+  const todos = bib.indice.colecoes.flatMap(c => c.itens)
+  $('gradeBib').innerHTML = itens.length ? [...porColecao].map(([colecao, lista]) => `
+    <div class="colecaoBib"><h4>${escapar(colecao)} · ${lista.length}</h4><div class="itensBib">${lista.map(i => `
+      <div class="itemBib" data-i="${todos.indexOf(i)}" title="${escapar(i.nome)} · ${i.l}×${i.a}px">
+        <img class="mini xadrez" loading="lazy" src="${miniaturaDe(i)}" alt="">
+        <span class="tipo">${ROTULO_TIPO[i.tipo]}</span>
+        <div class="acoesBib">
+          <button data-usar="estampa">Na estampa</button>
+          <button data-usar="mockup">Como mockup</button>
+          <button data-usar="logo">Logo</button>
+        </div>
+        <div class="rotulo">${escapar(i.nome)}</div>
+      </div>`).join('')}</div></div>`).join('')
+    : '<div class="avisoBib">Nada encontrado com esses filtros.</div>'
+}
+$('abasBib').addEventListener('click', e => { const b = e.target.closest('[data-tipo]'); if (!b) return; bib.tipo = b.dataset.tipo; montarBib() })
+$('colecaoBib').onchange = e => { bib.colecao = e.target.value; montarBib() }
+$('buscaBib').oninput = e => { bib.busca = e.target.value; montarBib() }
+
+/** Fonte da imagem para guardar no projeto: o caminho (pelo http) ou a própria imagem (pasta escolhida). */
+async function srcDaBiblioteca(item) {
+  if (!bib.arquivos) return urlDe(item.arquivo)
+  const blob = await (await fetch(urlDe(item.arquivo))).blob()
+  return (await lerImagem(new File([blob], 'x.png', { type: blob.type }))).src
+}
+$('gradeBib').addEventListener('click', async e => {
+  const card = e.target.closest('.itemBib'); if (!card) return
+  const item = bib.indice.colecoes.flatMap(c => c.itens)[Number(card.dataset.i)]
+  const acao = e.target.closest('[data-usar]')?.dataset.usar ?? (item.tipo === 'mockup' ? 'mockup' : 'estampa')
+  card.style.opacity = '.5'
+  const src = await srcDaBiblioteca(item)
+  card.style.opacity = ''
+  if (acao === 'estampa') {
+    const c = novaImagem(src, item.l, item.a, { nome: item.nome.slice(0, 28) })
+    adicionar(c)
+    fecharBib()
+    aviso(item.tipo === 'arteFundo' ? `“${item.nome}” adicionada. Ela tem fundo: use “Tirar fundo branco/preto” à direita.` : `“${item.nome}” adicionada. Arraste para qualquer lugar ou use os botões de posição.`)
+  } else if (acao === 'mockup') {
+    usarFotoMockup(src, item.l, item.a); fecharBib()
+  } else {
+    salvarHistorico(); estado.marca.logo = { src, l: item.l, a: item.a }; persistir()
+    aviso(`“${item.nome}” agora é o logo da marca (botão “Usar logo”).`)
+  }
 })
 
 // ── gerar com IA (API de imagens da OpenAI) ─────────────────────────────
@@ -1395,7 +1634,7 @@ async function receberImagem(arquivo, origem) {
   adicionar(novaImagem(img.src, img.l, img.a, { nome: origem === 'colada' ? 'Imagem colada' : arquivo.name.replace(/\.[^.]+$/, '').slice(0, 24) }))
   if (!$('janelaIa').hidden) fecharIa()
   aviso(await temFundo(img.src)
-    ? 'Imagem adicionada. Veio com fundo: use “Tirar fundo branco” ou “Cor única” no painel da direita.'
+    ? 'Imagem adicionada. Veio com fundo: use “Tirar fundo branco/preto” ou “Cor única” no painel da direita.'
     : 'Imagem adicionada à estampa.')
 }
 
@@ -1427,7 +1666,7 @@ centro.addEventListener('drop', async e => {
 function mostrarResultados(urls) {
   ia.resultados = urls
   $('resultadosIa').innerHTML = urls.map((u, i) => `
-    <div class="resultado"><img src="${u}" alt="Imagem gerada ${i + 1}">
+    <div class="resultado xadrez"><img src="${u}" alt="Imagem gerada ${i + 1}">
       <div class="acoes">
         <button data-usar="estampa" data-i="${i}">Usar na estampa</button>
         <button data-usar="mockup" data-i="${i}">Usar como mockup</button>
@@ -1475,34 +1714,92 @@ function baixar(blob, nome) {
   setTimeout(() => URL.revokeObjectURL(a.href), 4000)
 }
 const nomeArquivo = sufixo => `${(estado.marca.nome || 'estampa').replace(/[^\w-]+/g, '_')}-${vista}-${sufixo}`
+const cm = v => (v / PX_CM).toFixed(1).replace('.', ',')
 
-function renderizarArte() {
-  const c = document.createElement('canvas'); c.width = PW; c.height = PH
-  const g = c.getContext('2d')
-  desenharCamadas(g, camadas(), 1)
-  return c
+/** Camadas separadas por lugar da camiseta: o que fica a mais de 2 cm de distância vira outro arquivo
+ *  (logo da manga e estampa do peito são impressos separados). */
+function gruposDeImpressao() {
+  const itens = camadas().filter(c => !c.oculta).map(c => ({ c, b: limites(c) }))
+  const folga = 2 * PX_CM
+  const perto = (a, b) => a.x0 - folga <= b.x1 && b.x0 - folga <= a.x1 && a.y0 - folga <= b.y1 && b.y0 - folga <= a.y1
+  const pai = itens.map((_, i) => i)
+  const raiz = i => (pai[i] === i ? i : (pai[i] = raiz(pai[i])))
+  for (let i = 0; i < itens.length; i++) for (let j = i + 1; j < itens.length; j++) if (perto(itens[i].b, itens[j].b)) pai[raiz(i)] = raiz(j)
+  const grupos = new Map()
+  itens.forEach((it, i) => { const r = raiz(i); if (!grupos.has(r)) grupos.set(r, []); grupos.get(r).push(it.c) })
+  return [...grupos.values()].map(lista => {
+    const ls = lista.map(limites)
+    const cx = (Math.min(...ls.map(l => l.x0)) + Math.max(...ls.map(l => l.x1))) / 2 / U
+    const cy = (Math.min(...ls.map(l => l.y0)) + Math.max(...ls.map(l => l.y1))) / 2 / U
+    const [, lugar] = Object.entries(POSICOES[vista]).map(([k, p]) => [Math.hypot(p.x + p.l / 2 - cx, p.y + p.a / 2 - cy), p.nome]).sort((a, b) => a[0] - b[0])[0]
+    return { lista, lugar }
+  })
+}
+const slug = t => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+/** A arte no tamanho real (300 dpi), recortada no que foi colocado, sem a camiseta. */
+function renderizarArte(visiveis = camadas().filter(c => !c.oculta)) {
+  if (!visiveis.length) return null
+  const ls = visiveis.map(limites)
+  const b = { x0: Math.min(...ls.map(l => l.x0)), y0: Math.min(...ls.map(l => l.y0)), x1: Math.max(...ls.map(l => l.x1)), y1: Math.max(...ls.map(l => l.y1)) }
+  const w = b.x1 - b.x0, h = b.y1 - b.y0
+  // limite de memória do navegador: acima disso a arte sai com menos dpi (avisado)
+  const s = Math.min(1, 12000 / Math.max(w, h), Math.sqrt(50e6 / (w * h)))
+  const c = document.createElement('canvas'); c.width = Math.max(1, Math.ceil(w * s)); c.height = Math.max(1, Math.ceil(h * s))
+  desenharCamadas(c.getContext('2d'), visiveis, { s, tx: -b.x0 * s, ty: -b.y0 * s })
+  const r = aparar(c)
+  r.medidas = { w: r.width / s, h: r.height / s, dpi: Math.round(300 * s) }
+  return r
+}
+
+/** Corta as bordas transparentes: o arquivo fica do tamanho exato da tinta. Procura numa cópia pequena. */
+function aparar(c) {
+  const k = Math.min(1, 1000 / Math.max(c.width, c.height))
+  const p = document.createElement('canvas'); p.width = Math.max(1, Math.round(c.width * k)); p.height = Math.max(1, Math.round(c.height * k))
+  const g = p.getContext('2d'); g.drawImage(c, 0, 0, p.width, p.height)
+  const d = g.getImageData(0, 0, p.width, p.height).data
+  let x0 = p.width, y0 = p.height, x1 = -1, y1 = -1
+  for (let y = 0; y < p.height; y++) for (let x = 0; x < p.width; x++) {
+    if (d[(y * p.width + x) * 4 + 3] > 2) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y }
+  }
+  if (x1 < 0) return c
+  const X0 = Math.max(0, Math.floor((x0 - 1) / k)), Y0 = Math.max(0, Math.floor((y0 - 1) / k))
+  const X1 = Math.min(c.width, Math.ceil((x1 + 2) / k)), Y1 = Math.min(c.height, Math.ceil((y1 + 2) / k))
+  if (X0 === 0 && Y0 === 0 && X1 === c.width && Y1 === c.height) return c
+  const r = document.createElement('canvas'); r.width = X1 - X0; r.height = Y1 - Y0
+  r.getContext('2d').drawImage(c, -X0, -Y0)
+  return r
 }
 
 $('exportarArte').onclick = async () => {
   await document.fonts.ready
-  renderizarArte().toBlob(b => { baixar(b, nomeArquivo('impressao-3600x4800.png')); aviso('Arte baixada: PNG transparente 3600×4800 (30×40 cm a 300 dpi).') }, 'image/png')
+  const grupos = gruposDeImpressao()
+  if (!grupos.length) return aviso('Não há nada nesta vista para imprimir.')
+  const feitos = []
+  try {
+    for (const { lista, lugar } of grupos) {
+      const c = renderizarArte(lista)
+      const { w, h, dpi } = c.medidas
+      const blob = await new Promise(ok => c.toBlob(ok, 'image/png'))
+      baixar(blob, nomeArquivo(`${grupos.length > 1 ? slug(lugar) + '-' : ''}arte-${cm(w)}x${cm(h)}cm-${dpi}dpi.png`))
+      feitos.push(`${grupos.length > 1 ? lugar + ' ' : ''}${cm(w)} × ${cm(h)} cm${dpi < 300 ? ` (${dpi} dpi)` : ''}`)
+    }
+    aviso(`${feitos.length > 1 ? `${feitos.length} arquivos (um por lugar)` : 'Arte baixada'}: ${feitos.join(' · ')}. PNG transparente a 300 dpi.`)
+  } catch { aviso('O navegador bloqueou a exportação: abra o estúdio pelo abrir-estudio.command.') }
 }
 
 /** O mockup em alta: camisa (desenho ou foto) + arte assentada no tecido. */
 async function renderizarMockup() {
   await document.fonts.ready
   const f = fotoAtual()
-  let fundo, L, A, area
+  let fundo, L, A
   if (f) {
     fundo = imagemDe(f.src); await fundo.decode().catch(() => {})
     const k = Math.min(2400 / f.l, 2400 / f.a, 2)
     L = Math.round(f.l * k); A = Math.round(f.a * k)
-    area = { x: f.area.x * k, y: f.area.y * k, l: f.area.l * k, a: f.area.l * 4 / 3 * k }
   } else {
     L = 2000; A = 2200
-    const k = L / 1000, a = AREA[vista]
     fundo = await carregarSvg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1100" width="${L}" height="${A}">${svgCamisa(estado.corCamisa, vista)}</svg>`)
-    area = { x: a.x * k, y: a.y * k, l: a.l * k, a: a.a * k }
   }
   const c = document.createElement('canvas'); c.width = L; c.height = A
   const g = c.getContext('2d')
@@ -1513,18 +1810,21 @@ async function renderizarMockup() {
     g.fillStyle = grad; g.fillRect(0, 0, L, A)
   }
   g.drawImage(fundo, 0, 0, L, A)
-  const arte = document.createElement('canvas'); arte.width = Math.round(area.l); arte.height = Math.round(area.a)
-  const ga = arte.getContext('2d'); const esc = arte.width / PW; ga.setTransform(esc, 0, 0, esc, 0, 0)
-  desenharCamadas(ga, camadas(), esc)
+  const arte = document.createElement('canvas'); arte.width = L; arte.height = A
+  const ga = arte.getContext('2d')
+  const Tm = transformacao(L)
+  desenharCamadas(ga, camadas(), Tm)
   await new Promise(r => { prepararMapas(); const t = setInterval(() => { if (mapas.chave === chaveMapas()) { clearInterval(t); r() } }, 30); setTimeout(() => { clearInterval(t); r() }, 3000) })
   aplicarTecido(ga)
-  g.drawImage(arte, area.x, area.y)
+  recortarNaCamisa(ga, Tm.kb)
+  g.drawImage(arte, 0, 0)
   return c
 }
 
 $('exportarMockup').onclick = async () => {
   const c = await renderizarMockup()
-  c.toBlob(b => { baixar(b, nomeArquivo('mockup.png')); aviso('Mockup baixado.') }, 'image/png')
+  try { c.toBlob(b => { baixar(b, nomeArquivo('mockup.png')); aviso('Mockup baixado.') }, 'image/png') }
+  catch { aviso('O navegador bloqueou a exportação: abra o estúdio pelo abrir-estudio.command.') }
 }
 
 $('salvar').onclick = () => { baixar(new Blob([JSON.stringify(estado)], { type: 'application/json' }), `${(estado.marca.nome || 'projeto').replace(/[^\w-]+/g, '_')}-projeto.json`); aviso('Projeto salvo.') }
@@ -1544,7 +1844,7 @@ desenharCamisa(); montarPainelCamisa(); montarMarca(); montarCamadas(); montarPr
 if (!estado.camadas.frente.length && !estado.camadas.costas.length) {
   camadas().push(...MODELOS[0].criar(estado.marca)); persistir(); desenhar(); montarCamadas(); contarCores()
 }
-window.estudio = { get estado() { return estado }, MODELOS, EFEITOS, trocarVista, renderizarArte, renderizarMockup, usarFotoMockup, mostrarResultados, chamarOpenAI, montarPrompt, receberImagem, ia }
+window.estudio = { get estado() { return estado }, MODELOS, EFEITOS, POSICOES, U, trocarVista, renderizarArte, gruposDeImpressao, renderizarMockup, usarFotoMockup, mostrarResultados, chamarOpenAI, montarPrompt, receberImagem, abrirBib, posicionar, limites, ia, bib }
 </script>
 </body>
 </html>
