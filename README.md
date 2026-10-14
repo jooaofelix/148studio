@@ -23,6 +23,9 @@ pôr na estampa, ou use **Como mockup** / **Logo**.
   Drive para desktop, copia as imagens para `biblioteca/`, ignora repetidas e gera as miniaturas.
 - A pasta `biblioteca/` **não vai para o GitHub** (está no `.gitignore`): o repositório é público e as artes são
   da marca. Ela fica só no seu computador.
+- No site publicado (o repositório faz deploy no Cloudflare a cada push), a biblioteca não aparece sozinha pelo
+  mesmo motivo: lá, o botão pede para escolher a pasta `biblioteca` do computador, e as imagens só são abertas no
+  navegador, sem ir para a internet.
 - Se o Drive estiver em outro lugar: `ESTUDIO148_ORIGEM="/caminho/da/pasta" python3 ferramentas/biblioteca.py`.
 - **Usar a paleta das artes 148** (no kit da marca) troca a paleta pelas cores tiradas das artes da biblioteca.
 

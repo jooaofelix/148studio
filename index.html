@@ -1393,10 +1393,14 @@ const miniaturaDe = item => urlDe(item.miniatura) ?? urlDe(item.arquivo)
 async function abrirBib() {
   $('janelaBib').hidden = false
   if (!(await carregarBiblioteca())) {
+    // no site publicado a biblioteca não existe de propósito: as artes da marca não ficam na internet
+    const local = location.protocol === 'file:' || ['127.0.0.1', 'localhost'].includes(location.hostname)
     $('gradeBib').innerHTML = `<div class="avisoBib">
-      <p><b>A biblioteca ainda não está disponível nesta janela.</b></p>
+      ${local ? `<p><b>A biblioteca ainda não está disponível nesta janela.</b></p>
       <p>Abra o estúdio com dois cliques em <b>abrir-estudio.command</b> (pasta do 148 Estúdio). Assim as artes do Drive aparecem aqui sozinhas.</p>
-      <p>Ou escolha a pasta <b>biblioteca</b> agora:</p>
+      <p>Ou escolha a pasta <b>biblioteca</b> agora:</p>`
+      : `<p><b>As artes da 148 não ficam publicadas no site.</b></p>
+      <p>Para usar a biblioteca aqui, escolha a pasta <b>biblioteca</b> (dentro da pasta do 148 Estúdio no seu computador). As imagens são abertas só neste navegador: nada é enviado para a internet.</p>`}
       <button id="escolherPastaBib" class="primario">Escolher a pasta “biblioteca”</button>
       <p class="nota">Se ela ainda não existe, dê dois cliques em <b>atualizar-biblioteca.command</b>: ele copia as artes do Google Drive.</p></div>`
     $('escolherPastaBib').onclick = () => $('pastaBib').click()
