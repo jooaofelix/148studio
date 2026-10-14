@@ -10,7 +10,13 @@ Google Fonts, então a primeira abertura precisa de internet.
 
 ## O que tem
 
-- **Camiseta**: frente e costas, 8 cores, área de impressão de 30×40 cm.
+- **Mockup realista**: camiseta com caimento, dobras, trama da malha, gola canelada, costuras e sombra, em
+  frente e costas e 8 cores. A estampa "assenta" no tecido (pega as dobras e a luz), como num mockup de foto;
+  o arquivo de impressão continua limpo. Dá para desligar em "Estampa assentada no tecido".
+- **Mockup com foto real**: envie a foto de uma camiseta lisa sua (ou gere uma com a IA), ajuste a área de
+  impressão e a estampa entra com as dobras daquela foto.
+- **Gerar com IA**: arte para estampa (fundo transparente), foto de mockup ou imagem livre, a partir de uma
+  descrição ou de até 4 fotos de referência, usando a API de imagens da OpenAI (veja abaixo).
 - **Camadas**: texto, imagem e formas (círculo, retângulo, estrela, linha, anel), com ordem, ocultar e travar.
 - **Texto**: 13 fontes; forma reta, em arco, em círculo ou em onda; contorno, contorno externo, sombra chapada,
   sombra 3D, brilho neon, degradê, espaçamento e itálico.
@@ -22,6 +28,17 @@ Google Fonts, então a primeira abertura precisa de internet.
 - **Modelos 148**: número gigante, arco clássico, gótico, peito esquerdo, selo circular, empilhado, onda retrô, neon.
 - **Kit da marca**: nome, slogan, ano, paleta e logo, usados pelos modelos.
 - **Desfazer/refazer**, salvamento automático no navegador e projetos em `.json`.
+
+## Gerar com IA
+
+1. Crie uma chave em [platform.openai.com/api-keys](https://platform.openai.com/api-keys) e coloque créditos na conta.
+2. Clique em **✨ Gerar com IA**, cole a chave e salve. Ela fica **só no seu navegador** (localStorage): não vai
+   para o projeto, para os arquivos salvos nem para o GitHub. Nunca coloque a chave no código.
+3. Escolha o tipo (arte para estampa, foto de mockup ou livre), descreva e, se quiser, envie fotos de referência.
+4. Use o resultado na estampa, como foto do mockup, ou baixe.
+
+Cada imagem é cobrada na sua conta da OpenAI ("Rascunho" é o mais barato). Alguns modelos exigem verificar a
+organização na OpenAI; se der erro 403, escolha outro modelo na lista.
 
 ## Exportar
 

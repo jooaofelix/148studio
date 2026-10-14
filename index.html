@@ -17,12 +17,14 @@
   html, body { margin: 0; height: 100%; background: var(--fundo); color: var(--texto); font: 13px/1.4 Inter, system-ui, sans-serif; }
   button, input, select, textarea { font: inherit; color: inherit; }
   button { background: var(--painel2); border: 1px solid var(--borda); border-radius: 8px; padding: 7px 10px; cursor: pointer; }
-  button:hover { border-color: #4a4a58; background: #24242c; }
+  button:hover:not(:disabled) { border-color: #4a4a58; background: #24242c; }
+  button:disabled { opacity: .45; cursor: default; }
   button.primario { background: var(--destaque); color: #0d0d0f; border-color: var(--destaque); font-weight: 800; }
-  button.primario:hover { filter: brightness(1.08); }
+  button.primario:hover:not(:disabled) { filter: brightness(1.08); background: var(--destaque); }
   button.perigo { color: var(--perigo); }
   button.ativo { border-color: var(--destaque); color: var(--destaque); }
-  input[type=text], input[type=number], select, textarea { width: 100%; background: #0f0f13; border: 1px solid var(--borda); border-radius: 7px; padding: 6px 8px; }
+  button.ia { background: linear-gradient(135deg, #8b5cf6, #ec4899); border: 0; color: #fff; font-weight: 800; width: 100%; padding: 10px; }
+  input[type=text], input[type=password], input[type=number], select, textarea { width: 100%; background: #0f0f13; border: 1px solid var(--borda); border-radius: 7px; padding: 6px 8px; }
   textarea { resize: vertical; min-height: 54px; }
   input[type=color] { width: 34px; height: 30px; padding: 0; border: 1px solid var(--borda); border-radius: 7px; background: none; cursor: pointer; }
   input[type=range] { width: 100%; accent-color: var(--destaque); }
@@ -52,14 +54,18 @@
   .cor.ativo { border-color: var(--destaque); box-shadow: 0 0 0 2px #0d0d0f inset; }
   .paleta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   .chip { width: 24px; height: 24px; border-radius: 6px; border: 1px solid #444; cursor: pointer; }
+  .nota { color: var(--suave); font-size: 11.5px; margin: 6px 0 0; }
 
-  main { position: relative; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 40%, #202027 0%, #0d0d0f 70%); }
-  #palco { position: relative; width: min(620px, 92%); aspect-ratio: 1000 / 1100; }
-  #camisa { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 30px 40px rgba(0,0,0,.55)); }
+  main { position: relative; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 38%, #2a2a31 0%, #131316 62%, #0d0d0f 100%); }
+  main.claro { background: radial-gradient(circle at 50% 38%, #f3f1ec 0%, #dcd8d0 70%, #c9c4ba 100%); }
+  #palco { --ar: 1000 / 1100; position: relative; aspect-ratio: var(--ar); width: min(640px, 92%); max-height: calc(100vh - 140px); }
+  #camisa, #fotoMockup { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #fotoMockup { object-fit: fill; border-radius: 6px; box-shadow: 0 20px 50px rgba(0,0,0,.45); }
   #arte { position: absolute; touch-action: none; }
-  #areaGuia { position: absolute; border: 1px dashed rgba(232,255,58,.35); pointer-events: none; }
+  #areaGuia { position: absolute; border: 1px dashed rgba(232,255,58,.45); pointer-events: none; }
   .vista { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
   .dicaPalco { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); color: var(--suave); font-size: 12px; white-space: nowrap; }
+  main.claro .dicaPalco { color: #6b675f; }
 
   .camada { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid var(--borda); border-radius: 8px; margin-bottom: 5px; cursor: pointer; background: #111115; }
   .camada.sel { border-color: var(--destaque); }
@@ -72,10 +78,36 @@
   .valor { color: var(--texto); font-weight: 700; float: right; text-transform: none; letter-spacing: 0; }
   .secao { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--borda); }
   .secao > .titulo { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--destaque); }
-  #aviso { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid var(--borda); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: .2s; pointer-events: none; z-index: 9; }
+  #aviso { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: #000; border: 1px solid var(--borda); padding: 8px 14px; border-radius: 8px; opacity: 0; transition: .2s; pointer-events: none; z-index: 50; max-width: 80vw; }
   #aviso.on { opacity: 1; }
   .check { display: flex; align-items: center; gap: 8px; color: var(--texto); text-transform: none; font-size: 13px; letter-spacing: 0; font-weight: 500; }
   .check input { width: auto; }
+
+  /* ── janela da IA ── */
+  #janelaIa { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); }
+  #janelaIa[hidden] { display: none; }
+  .janela { width: min(940px, calc(100vw - 32px)); max-height: calc(100vh - 40px); overflow: auto; background: var(--painel); border: 1px solid var(--borda); border-radius: 16px; display: grid; grid-template-columns: 360px 1fr; }
+  .janela .lado { padding: 18px; }
+  .janela .lado + .lado { border-left: 1px solid var(--borda); background: #121216; }
+  .janela h2 { margin: 0 0 4px; font: 800 18px Unbounded, Inter, sans-serif; }
+  .janela .sub { color: var(--suave); margin: 0 0 8px; font-size: 12px; }
+  .abas { display: flex; gap: 6px; margin-top: 10px; }
+  .abas button { flex: 1; font-size: 12px; }
+  .refs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .refs figure { position: relative; margin: 0; width: 64px; height: 64px; border-radius: 8px; overflow: hidden; border: 1px solid var(--borda); }
+  .refs img { width: 100%; height: 100%; object-fit: cover; }
+  .refs button { position: absolute; top: 2px; right: 2px; padding: 0 5px; font-size: 11px; background: rgba(0,0,0,.7); }
+  #resultadosIa { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .resultado { border: 1px solid var(--borda); border-radius: 10px; overflow: hidden; background:
+    repeating-conic-gradient(#222 0 25%, #2c2c2c 0 50%) 0 0 / 18px 18px; }
+  .resultado img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; }
+  .resultado .acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 6px; background: var(--painel); }
+  .resultado .acoes button { font-size: 11px; padding: 6px 4px; }
+  .carregando { display: grid; place-items: center; min-height: 260px; color: var(--suave); text-align: center; }
+  .giro { width: 34px; height: 34px; border: 3px solid #333; border-top-color: #ec4899; border-radius: 50%; animation: girar 0.9s linear infinite; margin: 0 auto 10px; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  .erro { color: #ffb3bb; background: rgba(255, 77, 94, .1); border: 1px solid rgba(255, 77, 94, .35); border-radius: 8px; padding: 8px 10px; margin-top: 10px; font-size: 12px; }
+  .fechar { float: right; }
 </style>
 </head>
 <body>
@@ -98,9 +130,13 @@
     <input id="arquivoProjeto" type="file" accept=".json,application/json" hidden>
     <input id="arquivoImagem" type="file" accept="image/*" hidden>
     <input id="arquivoLogo" type="file" accept="image/*" hidden>
+    <input id="arquivoFoto" type="file" accept="image/*" hidden>
+    <input id="arquivoRefs" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
   </header>
 
   <aside>
+    <button class="ia" id="abrirIa">✨ Gerar com IA</button>
+
     <h3>Adicionar</h3>
     <div class="grade2">
       <button id="addTexto">＋ Texto</button>
@@ -130,13 +166,14 @@
     </div>
   </aside>
 
-  <main>
+  <main id="centro">
     <div class="vista">
       <button id="vistaFrente" class="ativo">Frente</button>
       <button id="vistaCostas">Costas</button>
     </div>
     <div id="palco">
       <svg id="camisa" viewBox="0 0 1000 1100" aria-hidden="true"></svg>
+      <img id="fotoMockup" alt="" hidden>
       <div id="areaGuia"></div>
       <canvas id="arte"></canvas>
     </div>
@@ -145,8 +182,7 @@
 
   <aside class="direita">
     <h3>Camiseta</h3>
-    <div class="cores" id="coresCamisa"></div>
-    <label class="check" style="margin-top:10px"><input type="checkbox" id="mostrarGuia" checked> Mostrar área de impressão</label>
+    <div id="painelCamisa"></div>
 
     <h3>Camadas</h3>
     <div id="camadas"></div>
@@ -155,39 +191,93 @@
     <div id="props"><p class="vazio">Selecione uma camada para editar.</p></div>
   </aside>
 </div>
+
+<div id="janelaIa" hidden>
+  <div class="janela" role="dialog" aria-labelledby="tituloIa">
+    <div class="lado">
+      <button class="fechar" id="fecharIa" title="Fechar (Esc)">✕</button>
+      <h2 id="tituloIa">✨ Gerar com IA</h2>
+      <p class="sub">Usa a API de imagens da OpenAI com a sua chave. Cada imagem é cobrada na sua conta da OpenAI.</p>
+
+      <div id="blocoChave"></div>
+
+      <div class="abas" id="abasIa">
+        <button data-modo="estampa" class="ativo">Arte p/ estampa</button>
+        <button data-modo="mockup">Foto de mockup</button>
+        <button data-modo="livre">Livre</button>
+      </div>
+      <p class="nota" id="explicaModo"></p>
+
+      <label>Descrição</label>
+      <textarea id="promptIa" rows="4" placeholder="Ex.: leão de juba em chamas, traço de tatuagem old school, duas cores"></textarea>
+
+      <label>Fotos de referência (opcional, até 4)</label>
+      <div class="linha"><button id="addRefs">＋ Enviar fotos</button></div>
+      <div class="refs" id="refsIa"></div>
+
+      <div class="grade2">
+        <div><label>Formato</label><select id="tamanhoIa">
+          <option value="1024x1024">Quadrado</option><option value="1024x1536">Retrato</option><option value="1536x1024">Paisagem</option>
+        </select></div>
+        <div><label>Qualidade</label><select id="qualidadeIa">
+          <option value="low">Rascunho (barato)</option><option value="medium" selected>Média</option><option value="high">Alta</option>
+        </select></div>
+        <div><label>Quantidade</label><select id="quantidadeIa"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+        <div><label>Modelo</label><select id="modeloIa">
+          <option value="gpt-image-1.5">gpt-image-1.5</option>
+          <option value="gpt-image-2.5-flare">gpt-image-2.5-flare</option>
+          <option value="gpt-image-2.5-sunburst">gpt-image-2.5-sunburst</option>
+          <option value="gpt-image-2">gpt-image-2</option>
+          <option value="gpt-image-1">gpt-image-1</option>
+          <option value="gpt-image-1-mini">gpt-image-1-mini (barato)</option>
+        </select></div>
+      </div>
+      <label class="check" style="margin-top:12px"><input type="checkbox" id="usarKitIa" checked> Incluir o kit da marca (nome e paleta)</label>
+      <button class="primario" id="gerarIa" style="width:100%;margin-top:14px;padding:10px">Gerar</button>
+      <div id="erroIa"></div>
+    </div>
+    <div class="lado">
+      <div id="resultadosIa"><div class="carregando" style="grid-column:1/-1"><div>As imagens geradas aparecem aqui.<br><br>Use uma na estampa ou como foto do mockup.</div></div></div>
+    </div>
+  </div>
+</div>
 <div id="aviso"></div>
 
 <script>
 'use strict'
 // ── constantes ───────────────────────────────────────────────────────────
 const PW = 3600, PH = 4800 // área de impressão: 30 × 40 cm a 300 dpi
-const AREA = { frente: { x: 330, y: 255, l: 340, a: 453 }, costas: { x: 330, y: 215, l: 340, a: 453 } } // no viewBox da camisa
+const AREA = { frente: { x: 335, y: 270, l: 330, a: 440 }, costas: { x: 335, y: 230, l: 330, a: 440 } } // no viewBox da camisa
 const CORES_CAMISA = [
-  ['Preta', '#111113'], ['Branca', '#f4f4f2'], ['Off-white', '#ebe4d6'], ['Cinza mescla', '#9a9ca3'],
-  ['Grafite', '#3a3b40'], ['Verde musgo', '#4a5236'], ['Marrom', '#5b4030'], ['Azul marinho', '#1c2438'],
+  ['Preta', '#141416'], ['Branca', '#f4f4f1'], ['Off-white', '#ece5d6'], ['Cinza mescla', '#9fa1a6'],
+  ['Grafite', '#3b3c41'], ['Verde musgo', '#4c5438'], ['Marrom', '#5e4232'], ['Azul marinho', '#1d2539'],
 ]
 const FONTES = ['Anton', 'Bebas Neue', 'Archivo Black', 'Rubik Mono One', 'Bungee', 'Unbounded', 'UnifrakturCook', 'Pirata One', 'Permanent Marker', 'Monoton', 'Playfair Display', 'Space Grotesk', 'Inter']
 const MISTURAS = [['source-over', 'Normal'], ['multiply', 'Multiplicar'], ['screen', 'Tela'], ['overlay', 'Sobrepor'], ['difference', 'Diferença'], ['color-dodge', 'Subexposição']]
 const FORMAS_TEXTO = [['reto', 'Reto'], ['arco', 'Arco'], ['circulo', 'Círculo'], ['onda', 'Onda']]
 const CHAVE = '148-estudio-v1'
+const CHAVE_OPENAI = '148-estudio-openai' // só neste navegador; nunca vai para o projeto
 
 // ── estado ──────────────────────────────────────────────────────────────
 let estado = migrar(carregarLocal()) ?? estadoInicial()
 let vista = 'frente'
 let selecionada = null
 let guias = []
+let realismo = true
 const historico = [], refeito = []
 const imagens = new Map() // src → HTMLImageElement
 
 function estadoInicial() {
   return {
-    corCamisa: '#111113',
+    corCamisa: '#141416',
     marca: { nome: '148', frase: 'ORIGINAL DA RUA', ano: '2024', paleta: ['#ffffff', '#111113', '#e8ff3a', '#d7263d', '#ebe4d6'], logo: null },
     camadas: { frente: [], costas: [] },
+    fotos: { frente: null, costas: null },
   }
 }
 function migrar(e) {
   if (!e) return null
+  e.fotos ??= { frente: null, costas: null }
   for (const lista of Object.values(e.camadas)) for (const c of lista) if (c.tipo === 'texto') Object.assign(c, { ...padraoTexto(), ...c, modo: c.modo ?? (c.curva ? 'arco' : 'reto') })
   return e
 }
@@ -195,16 +285,17 @@ function migrar(e) {
 const uid = () => Math.random().toString(36).slice(2, 9)
 const camadas = () => estado.camadas[vista]
 const camadaSel = () => camadas().find(c => c.id === selecionada) ?? null
+const fotoAtual = () => estado.fotos?.[vista] ?? null
 
 function salvarHistorico() {
   historico.push(JSON.stringify(estado))
-  if (historico.length > 60) historico.shift()
+  if (historico.length > 40) historico.shift()
   refeito.length = 0
 }
 let avisouCheio = false
 function persistir() {
   try { localStorage.setItem(CHAVE, JSON.stringify(estado)) }
-  catch { if (!avisouCheio) { avisouCheio = true; aviso('Projeto grande demais para o salvamento automático: use “Salvar projeto”.') } }
+  catch { if (!avisouCheio) { avisouCheio = true; aviso('Projeto grande demais para o salvamento automático (fotos pesam): use “Salvar projeto”.') } }
 }
 function carregarLocal() { try { return JSON.parse(localStorage.getItem(CHAVE)) } catch { return null } }
 function mudou(comHistorico = true) { if (comHistorico) salvarHistorico(); persistir(); desenhar(); montarCamadas(); montarProps(); contarCores() }
@@ -228,7 +319,7 @@ function novaForma(forma, o = {}) {
   return { ...c, ...o }
 }
 function novaImagem(src, l, a, o = {}) {
-  const k = Math.min(2400 / l, 2400 / a)
+  const k = Math.min(2600 / l, 2600 / a)
   return { ...base(), tipo: 'imagem', nome: 'Imagem', src, srcOriginal: src, l: l * k, a: a * k, tinta: estado.marca.paleta[0], limiar: 0.85, ...o }
 }
 function adicionar(c) { salvarHistorico(); camadas().push(c); selecionada = c.id; mudou(false) }
@@ -281,10 +372,7 @@ function letras(g, c) {
     const w = g.measureText(ch).width
     const meio = a + (w / 2) / r
     const ang = sentido > 0 ? meio : -meio
-    // em cima: letras sobre o círculo, viradas para fora; embaixo: lidas da esquerda para a direita
-    const x = Math.sin(ang) * r * sentido
-    const y = cy - Math.cos(ang) * r * sentido
-    saida.push({ ch, x, y, rot: ang, w })
+    saida.push({ ch, x: Math.sin(ang) * r * sentido, y: cy - Math.cos(ang) * r * sentido, rot: ang, w })
     a += (w + c.espacamento) / r
   }
   return saida
@@ -307,7 +395,7 @@ function caixaLocal(c) {
   return { x0: -c.l / 2 - m, y0: -c.a / 2 - m, x1: c.l / 2 + m, y1: c.a / 2 + m }
 }
 
-// ── desenho ─────────────────────────────────────────────────────────────
+// ── desenho das camadas ─────────────────────────────────────────────────
 const canvas = document.getElementById('arte')
 const ctx = canvas.getContext('2d')
 const texturaDesgaste = criarTextura()
@@ -334,28 +422,23 @@ function desenharTexto(g, c) {
   const ls = letras(g, c)
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.miterLimit = 2
   const cada = (dx, dy, fn) => { for (const l of ls) { g.save(); g.translate(l.x + dx, l.y + dy); g.rotate(l.rot); fn(l.ch); g.restore() } }
-  // 1. sombra 3D (extrusão): o texto repetido na diagonal, na cor da sombra
   if (c.extrusao > 0) {
     const passo = Math.max(3, c.tamanho / 60)
     g.fillStyle = c.sombraCor; g.strokeStyle = c.sombraCor; g.lineWidth = (c.contorno + c.contorno2) * 2
     for (let d = c.extrusao; d > 0; d -= passo) cada(d, d, ch => { if (g.lineWidth) g.strokeText(ch, 0, 0); g.fillText(ch, 0, 0) })
   }
-  // 2. sombra deslocada (chapada)
   if (c.sombra > 0) {
     g.fillStyle = c.sombraCor; g.strokeStyle = c.sombraCor; g.lineWidth = (c.contorno + c.contorno2) * 2
     cada(c.sombra, c.sombra, ch => { if (g.lineWidth) g.strokeText(ch, 0, 0); g.fillText(ch, 0, 0) })
   }
-  // 3. brilho (neon)
   if (c.brilho > 0) {
     const m = g.getTransform()
     g.save(); g.shadowColor = c.cor; g.shadowBlur = c.brilho * Math.hypot(m.a, m.b); g.fillStyle = c.cor
     for (let k = 0; k < 3; k++) cada(0, 0, ch => g.fillText(ch, 0, 0))
     g.restore()
   }
-  // 4. contorno externo e contorno
   if (c.contorno2 > 0) { g.lineWidth = (c.contorno + c.contorno2) * 2; g.strokeStyle = c.contorno2Cor; cada(0, 0, ch => g.strokeText(ch, 0, 0)) }
   if (c.contorno > 0) { g.lineWidth = c.contorno * 2; g.strokeStyle = c.contornoCor; cada(0, 0, ch => g.strokeText(ch, 0, 0)) }
-  // 5. preenchimento (cor ou degradê vertical por letra)
   if (c.preencherTexto) {
     if (c.degrade) {
       const grad = g.createLinearGradient(0, -c.tamanho / 2, 0, c.tamanho / 2)
@@ -387,7 +470,7 @@ function desenharForma(g, c) {
 }
 
 function imagemDe(src) {
-  if (!imagens.has(src)) { const img = new Image(); img.onload = () => desenhar(); img.src = src; imagens.set(src, img) }
+  if (!imagens.has(src)) { const img = new Image(); img.onload = () => { mapas.chave = null; desenhar() }; img.src = src; imagens.set(src, img) }
   return imagens.get(src)
 }
 function desenharImagem(g, c) {
@@ -402,7 +485,6 @@ function desenharCamadas(g, lista, escala) {
   const t = temp.getContext('2d')
   for (const c of lista) {
     if (c.oculta) continue
-    // cada camada é desenhada à parte e depois composta, para o desgaste e a mesclagem valerem só para ela
     t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, temp.width, temp.height); t.setTransform(escala, 0, 0, escala, 0, 0)
     t.save()
     t.translate(c.x, c.y); t.rotate(c.rot * Math.PI / 180); t.scale(c.escala, c.escala)
@@ -426,17 +508,131 @@ function desenharCamadas(g, lista, escala) {
   }
 }
 
+// ── realismo: a estampa assenta no tecido ───────────────────────────────
+// Dois mapas alinhados à área de impressão: "sombra" (branco = sem efeito, cinza = dobra escura)
+// multiplica a arte; "luz" (preto = sem efeito) clareia. Vêm das dobras do desenho ou da foto.
+const mapas = { chave: null, sombra: null, luz: null, carregando: null }
+const texturaMalha = criarMalha()
+
+function criarMalha() {
+  const t = document.createElement('canvas'); t.width = t.height = 256
+  const g = t.getContext('2d'), d = g.createImageData(256, 256)
+  let s = 7
+  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647
+  for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+    const i = (y * 256 + x) * 4
+    // fios da malha: leve listra vertical + ruído
+    const v = 238 + Math.sin(x * 2.1) * 6 + (rnd() - 0.5) * 22
+    d.data[i] = d.data[i + 1] = d.data[i + 2] = Math.max(0, Math.min(255, v)); d.data[i + 3] = 255
+  }
+  g.putImageData(d, 0, 0)
+  return t
+}
+
+function chaveMapas() {
+  const f = fotoAtual()
+  return f ? `foto:${f.src.length}:${f.src.slice(-40)}:${f.area.x}:${f.area.y}:${f.area.l}` : `svg:${vista}:${estado.corCamisa}`
+}
+
+function prepararMapas() {
+  const chave = chaveMapas()
+  if (mapas.chave === chave || mapas.carregando === chave) return
+  mapas.carregando = chave
+  const pronto = (sombra, luz) => { if (mapas.carregando !== chave) return; Object.assign(mapas, { chave, sombra, luz, carregando: null }); desenhar() }
+  const f = fotoAtual()
+  if (f) {
+    const img = imagemDe(f.src)
+    const fazer = () => pronto(...mapasDaFoto(img, f.area))
+    if (img.complete && img.naturalWidth) fazer(); else img.addEventListener('load', fazer, { once: true })
+    return
+  }
+  const a = AREA[vista]
+  const svg = (fundo, conteudo) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${a.x} ${a.y} ${a.l} ${a.a}" width="660" height="880">
+    <defs>${filtrosSvg()}</defs><rect x="0" y="0" width="1000" height="1100" fill="${fundo}"/>${conteudo}</svg>`
+  const d = dobras(vista, estado.corCamisa)
+  Promise.all([carregarSvg(svg('#ffffff', d.sombrasMapa)), carregarSvg(svg('#000000', d.luzesMapa))]).then(([s, l]) => pronto(s, l))
+}
+
+function carregarSvg(texto) {
+  return new Promise(ok => { const img = new Image(); img.onload = () => ok(img); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(texto) })
+}
+
+/** Mapas a partir da foto: o que é mais escuro que a média vira dobra; o que é mais claro, luz. */
+function mapasDaFoto(img, area) {
+  const L = 330, A = 440
+  const t = document.createElement('canvas'); t.width = L; t.height = A
+  const g = t.getContext('2d')
+  g.filter = 'blur(2.5px)' // tira o ruído da foto: só as dobras grandes contam
+  g.drawImage(img, area.x, area.y, area.l, area.l * 4 / 3, 0, 0, L, A)
+  const px = g.getImageData(0, 0, L, A).data
+  const lum = new Float32Array(L * A)
+  let soma = 0
+  for (let i = 0; i < lum.length; i++) { lum[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255; soma += lum[i] }
+  const media = Math.max(0.02, soma / lum.length)
+  const fazer = fn => {
+    const c = document.createElement('canvas'); c.width = L; c.height = A
+    const cg = c.getContext('2d'), d = cg.createImageData(L, A)
+    for (let i = 0; i < lum.length; i++) { const v = fn(lum[i]); d.data[i * 4] = d.data[i * 4 + 1] = d.data[i * 4 + 2] = v; d.data[i * 4 + 3] = 255 }
+    cg.putImageData(d, 0, 0)
+    return c
+  }
+  return [
+    // em tecido escuro, diferenças pequenas viram razões grandes: atenua e limita a 50% de sombra
+    fazer(v => 255 * Math.max(0.5, Math.min(1, 1 - 0.7 * (1 - v / media)))),
+    fazer(v => 255 * Math.min(1, Math.max(0, (v - media) / Math.max(0.05, 1 - media)) * 0.55)),
+  ]
+}
+
+/** Aplica dobras, luz e trama do tecido só onde há arte (o arquivo de impressão não passa por aqui). */
+function aplicarTecido(g) {
+  prepararMapas()
+  if (!realismo || !mapas.sombra) return
+  const w = g.canvas.width, h = g.canvas.height
+  const mascara = document.createElement('canvas'); mascara.width = w; mascara.height = h
+  mascara.getContext('2d').drawImage(g.canvas, 0, 0)
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0)
+  g.globalCompositeOperation = 'multiply'
+  g.drawImage(mapas.sombra, 0, 0, w, h)
+  g.globalAlpha = 0.55
+  const malha = g.createPattern(texturaMalha, 'repeat')
+  malha.setTransform(new DOMMatrix().scale(Math.max(0.35, w / 1400)))
+  g.fillStyle = malha; g.fillRect(0, 0, w, h)
+  g.globalAlpha = 1
+  g.globalCompositeOperation = 'screen'
+  g.drawImage(mapas.luz, 0, 0, w, h)
+  g.globalCompositeOperation = 'destination-in'
+  g.drawImage(mascara, 0, 0)
+  g.restore()
+}
+
+// ── tela ────────────────────────────────────────────────────────────────
 let escalaTela = 1
 function posicionarCanvas() {
-  const palco = document.getElementById('palco').getBoundingClientRect()
-  const a = AREA[vista]
-  const k = palco.width / 1000
-  const css = { left: a.x * k, top: a.y * k, width: a.l * k, height: a.a * k }
+  const palco = document.getElementById('palco')
+  const f = fotoAtual()
+  const foto = document.getElementById('fotoMockup')
+  document.getElementById('camisa').style.display = f ? 'none' : 'block'
+  foto.hidden = !f
+  let area, larguraBase
+  if (f) {
+    palco.style.setProperty('--ar', `${f.l} / ${f.a}`)
+    if (foto.getAttribute('src') !== f.src) foto.src = f.src
+    area = { x: f.area.x, y: f.area.y, l: f.area.l, a: f.area.l * 4 / 3 }
+    larguraBase = f.l
+  } else {
+    palco.style.setProperty('--ar', '1000 / 1100')
+    area = AREA[vista]; larguraBase = 1000
+  }
+  const r = palco.getBoundingClientRect()
+  const k = r.width / larguraBase
+  const css = { left: area.x * k, top: area.y * k, width: area.l * k, height: area.a * k }
   for (const el of [canvas, document.getElementById('areaGuia')]) Object.assign(el.style, { left: css.left + 'px', top: css.top + 'px', width: css.width + 'px', height: css.height + 'px' })
   const dpr = window.devicePixelRatio || 1
   canvas.width = Math.max(1, Math.round(css.width * dpr)); canvas.height = Math.max(1, Math.round(css.height * dpr))
   escalaTela = canvas.width / PW
-  document.getElementById('areaGuia').style.display = document.getElementById('mostrarGuia').checked ? 'block' : 'none'
+  document.getElementById('areaGuia').style.display = document.getElementById('mostrarGuia')?.checked === false ? 'none' : 'block'
+  // fundo de estúdio claro para camiseta escura (como nas fotos de produto), escuro para camiseta clara
+  document.getElementById('centro').classList.toggle('claro', !f && luminancia(estado.corCamisa) < 0.5)
   desenhar()
 }
 
@@ -445,6 +641,7 @@ function desenhar() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.setTransform(escalaTela, 0, 0, escalaTela, 0, 0)
   desenharCamadas(ctx, camadas(), escalaTela)
+  aplicarTecido(ctx)
   ctx.setTransform(escalaTela, 0, 0, escalaTela, 0, 0)
   for (const gu of guias) {
     ctx.save(); ctx.strokeStyle = '#ff3ad2'; ctx.lineWidth = 1.5 / escalaTela
@@ -478,30 +675,94 @@ function desenharSelecao(c) {
   ctx.restore()
 }
 
-// ── camisa (mockup em SVG) ──────────────────────────────────────────────
-function svgCamisa(cor, lado) {
-  const escuro = luminancia(cor) < 0.5
-  const sombra = escuro ? 'rgba(0,0,0,.45)' : 'rgba(0,0,0,.16)'
-  const luz = escuro ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.35)'
-  const gola = lado === 'frente'
-    ? `<path d="M405 92 Q500 190 595 92" fill="none" stroke="${sombra}" stroke-width="18"/><path d="M405 92 Q500 170 595 92" fill="none" stroke="${luz}" stroke-width="5"/>`
-    : `<path d="M415 92 Q500 125 585 92" fill="none" stroke="${sombra}" stroke-width="14"/>`
-  const contorno = 'M405 92 L300 120 L118 230 L48 420 L190 470 L230 405 L232 1040 Q500 1068 768 1040 L770 405 L810 470 L952 420 L882 230 L700 120 L595 92'
-  return `
-    <defs>
-      <linearGradient id="dobra" x1="0" x2="1"><stop offset="0" stop-color="${sombra}"/><stop offset=".18" stop-color="rgba(0,0,0,0)"/><stop offset=".82" stop-color="rgba(0,0,0,0)"/><stop offset="1" stop-color="${sombra}"/></linearGradient>
-      <linearGradient id="luz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${luz}"/><stop offset=".5" stop-color="rgba(255,255,255,0)"/></linearGradient>
-    </defs>
-    <path d="${contorno} Q500 ${lado === 'frente' ? 175 : 120} 405 92 Z" fill="${cor}"/>
-    <path d="M232 405 L232 1040 Q500 1068 768 1040 L770 405 Z" fill="url(#dobra)"/>
-    <path d="${contorno} Z" fill="url(#luz)" opacity=".8"/>
-    <path d="M230 405 L190 470 M770 405 L810 470" stroke="${sombra}" stroke-width="6"/>
-    <path d="M232 400 Q240 300 300 120 M768 400 Q760 300 700 120" stroke="${sombra}" stroke-width="4" fill="none" opacity=".6"/>
-    ${gola}`
-}
+// ── camisa desenhada (mockup em SVG) ────────────────────────────────────
 function luminancia(hex) {
   const n = parseInt(String(hex).slice(1), 16)
   return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255
+}
+function misturar(hex, alvo, f) {
+  const n = parseInt(hex.slice(1), 16)
+  const canal = s => Math.round(((n >> s) & 255) + (alvo - ((n >> s) & 255)) * f).toString(16).padStart(2, '0')
+  return `#${canal(16)}${canal(8)}${canal(0)}`
+}
+
+function contornoCamisa(lado) {
+  const gola = lado === 'frente' ? 'C566 156 434 156 400 86' : 'C566 112 434 112 400 86'
+  return `M400 86 C368 96 328 104 290 116 C226 136 166 166 116 208 C92 262 70 330 60 402 L198 462
+    C210 442 222 426 236 414 C240 560 238 862 234 1032 C330 1054 670 1054 766 1032 C762 862 760 560 764 414
+    C778 426 790 442 802 462 L940 402 C930 330 908 262 884 208 C834 166 774 136 710 116 C672 104 632 96 600 86 ${gola} Z`
+}
+
+function filtrosSvg() {
+  return `<filter id="f8" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+    <filter id="f16" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="16"/></filter>
+    <filter id="f30" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="30"/></filter>`
+}
+
+/** Dobras e luzes do tecido; as mesmas formas viram os mapas que assentam a estampa. */
+function dobras(lado, cor) {
+  const escuro = luminancia(cor) < 0.45
+  // em tecido claro a mesma dobra parece muito mais escura: bem menos força
+  const forca = escuro ? 1.25 : 0.32
+  const s = (op) => `rgba(0,0,0,${(op * forca).toFixed(3)})`
+  const sombras = `
+    <path d="M250 430 C300 470 340 520 380 600" stroke="${s(.55)}" stroke-width="26" fill="none" filter="url(#f16)"/>
+    <path d="M255 520 C300 560 330 610 352 700" stroke="${s(.35)}" stroke-width="20" fill="none" filter="url(#f16)"/>
+    <path d="M750 430 C700 470 660 520 620 600" stroke="${s(.55)}" stroke-width="26" fill="none" filter="url(#f16)"/>
+    <path d="M745 520 C700 560 670 610 648 700" stroke="${s(.35)}" stroke-width="20" fill="none" filter="url(#f16)"/>
+    <path d="M420 780 C445 850 432 930 455 1010" stroke="${s(.18)}" stroke-width="22" fill="none" filter="url(#f16)"/>
+    <path d="M590 800 C572 870 592 940 572 1010" stroke="${s(.15)}" stroke-width="20" fill="none" filter="url(#f16)"/>
+    <path d="M330 870 C358 935 350 985 368 1030" stroke="${s(.13)}" stroke-width="18" fill="none" filter="url(#f16)"/>
+    <path d="M500 660 C518 720 506 770 514 830" stroke="${s(.08)}" stroke-width="20" fill="none" filter="url(#f30)"/>`
+  const luzes = `
+    <ellipse cx="420" cy="330" rx="150" ry="90" fill="rgba(255,255,255,${escuro ? .045 : .4})" filter="url(#f30)"/>
+    <ellipse cx="610" cy="300" rx="120" ry="70" fill="rgba(255,255,255,${escuro ? .035 : .3})" filter="url(#f30)"/>
+    <path d="M300 450 C340 520 360 580 395 650" stroke="rgba(255,255,255,${escuro ? .09 : .45})" stroke-width="22" fill="none" filter="url(#f16)"/>
+    <path d="M700 450 C660 520 640 580 605 650" stroke="rgba(255,255,255,${escuro ? .09 : .45})" stroke-width="22" fill="none" filter="url(#f16)"/>
+    <path d="M470 780 C480 850 475 920 492 1000" stroke="rgba(255,255,255,${escuro ? .07 : .35})" stroke-width="22" fill="none" filter="url(#f16)"/>`
+  return { sombras, luzes, sombrasMapa: sombras, luzesMapa: luzes }
+}
+
+function svgCamisa(cor, lado) {
+  const escuro = luminancia(cor) < 0.45
+  const borda = misturar(cor, 0, escuro ? 0.35 : 0.18)
+  const costura = escuro ? 'rgba(255,255,255,.13)' : 'rgba(0,0,0,.18)'
+  const sombra = `rgba(0,0,0,${escuro ? .5 : .22})`
+  const contorno = contornoCamisa(lado)
+  const { sombras, luzes } = dobras(lado, cor)
+  const golaFrente = `
+    <path d="M400 86 C430 66 570 66 600 86 C568 100 432 100 400 86 Z" fill="${misturar(cor, 0, escuro ? 0.55 : 0.28)}"/>
+    <path d="M400 86 C434 156 566 156 600 86" fill="none" stroke="${borda}" stroke-width="24"/>
+    <path d="M400 86 C434 156 566 156 600 86" fill="none" stroke="${misturar(cor, escuro ? 255 : 0, 0.08)}" stroke-width="18"/>
+    <path d="M410 98 C440 158 560 158 590 98" fill="none" stroke="${costura}" stroke-width="1.6" stroke-dasharray="5 4"/>
+    <path d="M394 80 C432 168 568 168 606 80" fill="none" stroke="${costura}" stroke-width="1.4" stroke-dasharray="5 4" opacity=".7"/>`
+  const golaCostas = `
+    <path d="M400 86 C434 112 566 112 600 86" fill="none" stroke="${borda}" stroke-width="20"/>
+    <path d="M400 86 C434 112 566 112 600 86" fill="none" stroke="${misturar(cor, escuro ? 255 : 0, 0.07)}" stroke-width="14"/>
+    <path d="M405 99 C440 121 560 121 595 99" fill="none" stroke="${costura}" stroke-width="1.5" stroke-dasharray="5 4"/>`
+  return `
+    <defs>
+      ${filtrosSvg()}
+      <clipPath id="recorte"><path d="${contorno}"/></clipPath>
+      <linearGradient id="lados" x1="0" x2="1"><stop offset="0" stop-color="${sombra}"/><stop offset=".16" stop-color="rgba(0,0,0,0)"/><stop offset=".84" stop-color="rgba(0,0,0,0)"/><stop offset="1" stop-color="${sombra}"/></linearGradient>
+      <linearGradient id="vertical" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,255,255,${escuro ? .05 : .25})"/><stop offset=".55" stop-color="rgba(0,0,0,0)"/><stop offset="1" stop-color="rgba(0,0,0,${escuro ? .25 : .1})"/></linearGradient>
+      <filter id="malha" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="8"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .5"/></feComponentTransfer></filter>
+    </defs>
+    <ellipse cx="500" cy="1062" rx="320" ry="22" fill="rgba(0,0,0,.45)" filter="url(#f16)"/>
+    <path d="${contorno}" fill="${cor}"/>
+    <g clip-path="url(#recorte)">
+      <rect width="1000" height="1100" fill="url(#lados)"/>
+      <rect width="1000" height="1100" fill="url(#vertical)"/>
+      ${sombras}${luzes}
+      <path d="M116 208 C150 260 180 330 198 462 M884 208 C850 260 820 330 802 462" stroke="rgba(0,0,0,${escuro ? .35 : .14})" stroke-width="14" fill="none" filter="url(#f8)"/>
+      <rect width="1000" height="1100" filter="url(#malha)" opacity="${escuro ? .22 : .16}" style="mix-blend-mode:${escuro ? 'screen' : 'multiply'}"/>
+      <path d="M70 392 L206 450 M930 392 L794 450" stroke="${costura}" stroke-width="1.6" stroke-dasharray="5 4"/>
+      <path d="M240 1010 C330 1032 670 1032 760 1010" stroke="${costura}" stroke-width="1.6" stroke-dasharray="5 4" fill="none"/>
+      <path d="M290 116 C276 220 256 330 236 414 M710 116 C724 220 744 330 764 414" stroke="${costura}" stroke-width="1.4" stroke-dasharray="5 4" fill="none" opacity=".8"/>
+    </g>
+    <path d="M400 86 C368 96 328 104 290 116 M600 86 C632 96 672 104 710 116" stroke="${borda}" stroke-width="2" fill="none" opacity=".8"/>
+    <path d="${contorno}" fill="none" stroke="${borda}" stroke-width="1.5" opacity=".6"/>
+    ${lado === 'frente' ? golaFrente : golaCostas}`
 }
 function desenharCamisa() { document.getElementById('camisa').innerHTML = svgCamisa(estado.corCamisa, vista) }
 
@@ -585,7 +846,8 @@ canvas.addEventListener('pointermove', e => {
 canvas.addEventListener('pointerup', () => { if (arraste) { arraste = null; guias = []; mudou(false) } })
 
 window.addEventListener('keydown', e => {
-  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return
+  if (e.key === 'Escape' && !$('janelaIa').hidden) { fecharIa(); return }
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) || !$('janelaIa').hidden) return
   const c = camadaSel()
   const mod = e.metaKey || e.ctrlKey
   if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? refazer() : desfazer(); return }
@@ -607,7 +869,10 @@ function remover(id) { salvarHistorico(); estado.camadas[vista] = camadas().filt
 function duplicar(c) { adicionar({ ...structuredClone(c), id: uid(), x: c.x + 120, y: c.y + 120 }) }
 function desfazer() { if (!historico.length) return; refeito.push(JSON.stringify(estado)); estado = JSON.parse(historico.pop()); posAlterarEstado() }
 function refazer() { if (!refeito.length) return; historico.push(JSON.stringify(estado)); estado = JSON.parse(refeito.pop()); posAlterarEstado() }
-function posAlterarEstado() { if (!camadaSel()) selecionada = null; persistir(); desenharCamisa(); montarCoresCamisa(); montarMarca(); desenhar(); montarCamadas(); montarProps(); contarCores() }
+function posAlterarEstado() {
+  if (!camadaSel()) selecionada = null
+  persistir(); desenharCamisa(); montarPainelCamisa(); montarMarca(); posicionarCanvas(); montarCamadas(); montarProps(); contarCores()
+}
 
 /** Alinha a camada à área de impressão pelo seu contorno real (já girado e escalado). */
 function alinhar(c, como) {
@@ -653,9 +918,8 @@ function processarImagem(c, processo) {
         const brilho = (0.299 * r + 0.587 * gg + 0.114 * b) / 255
         if (processo === 'semFundo') {
           const sat = (Math.max(r, gg, b) - Math.min(r, gg, b)) / 255
-          if (brilho > lim && sat < 0.15) px[i + 3] = Math.round(px[i + 3] * Math.max(0, (1 - brilho) / (1 - lim) - 0.0))
+          if (brilho > lim && sat < 0.15) px[i + 3] = Math.round(px[i + 3] * Math.max(0, (1 - brilho) / (1 - lim)))
         } else if (processo === 'corUnica') {
-          // escuro vira tinta; claro some (ideal para logos e desenhos em fundo claro)
           px[i + 3] = Math.round(px[i + 3] * Math.max(0, Math.min(1, (lim - brilho) / Math.max(0.05, lim) * 1.6)))
           px[i] = tr; px[i + 1] = tg; px[i + 2] = tb
         } else if (processo === 'contraste') {
@@ -676,14 +940,60 @@ function processarImagem(c, processo) {
 
 // ── painéis ─────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id)
-function aviso(t) { const a = $('aviso'); a.textContent = t; a.classList.add('on'); clearTimeout(aviso.t); aviso.t = setTimeout(() => a.classList.remove('on'), 2400) }
-
-function montarCoresCamisa() {
-  $('coresCamisa').innerHTML = CORES_CAMISA.map(([n, c]) => `<button class="cor ${c === estado.corCamisa ? 'ativo' : ''}" style="background:${c}" title="${n}" data-cor="${c}"></button>`).join('')
-}
-$('coresCamisa').addEventListener('click', e => { const b = e.target.closest('[data-cor]'); if (!b) return; salvarHistorico(); estado.corCamisa = b.dataset.cor; persistir(); desenharCamisa(); montarCoresCamisa() })
-
+function aviso(t) { const a = $('aviso'); a.textContent = t; a.classList.add('on'); clearTimeout(aviso.t); aviso.t = setTimeout(() => a.classList.remove('on'), 2800) }
 const escapar = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch])
+
+function montarPainelCamisa() {
+  const f = fotoAtual()
+  const cores = `<div class="cores">${CORES_CAMISA.map(([n, c]) => `<button class="cor ${!f && c === estado.corCamisa ? 'ativo' : ''}" style="background:${c}" title="${n}" data-cor="${c}"></button>`).join('')}</div>`
+  const foto = f ? `
+    <p class="nota">Usando uma foto como mockup desta vista. Ajuste onde a estampa fica:</p>
+    <label>Posição horizontal <span class="valor">${Math.round(f.area.x)}</span></label><input type="range" data-area="x" min="0" max="${f.l}" value="${f.area.x}">
+    <label>Posição vertical <span class="valor">${Math.round(f.area.y)}</span></label><input type="range" data-area="y" min="0" max="${f.a}" value="${f.area.y}">
+    <label>Tamanho da área <span class="valor">${Math.round(f.area.l)}</span></label><input type="range" data-area="l" min="${Math.round(f.l * 0.08)}" max="${Math.round(f.l * 0.9)}" value="${f.area.l}">
+    <div class="grade2" style="margin-top:10px"><button data-foto="trocar">Trocar foto</button><button data-foto="remover" class="perigo">Voltar ao desenho</button></div>`
+    : `<div class="grade2" style="margin-top:10px"><button data-foto="enviar">📷 Usar foto real</button><button data-foto="ia">✨ Gerar foto</button></div>
+       <p class="nota">Envie a foto de uma camiseta lisa sua (de frente, bem iluminada) para um mockup real.</p>`
+  $('painelCamisa').innerHTML = cores + foto + `
+    <label class="check" style="margin-top:10px"><input type="checkbox" id="realismo" ${realismo ? 'checked' : ''}> Estampa assentada no tecido (dobras e trama)</label>
+    <label class="check" style="margin-top:6px"><input type="checkbox" id="mostrarGuia" ${$('mostrarGuia')?.checked === false ? '' : 'checked'}> Mostrar área de impressão</label>`
+}
+$('painelCamisa').addEventListener('click', e => {
+  const cor = e.target.closest('[data-cor]')
+  if (cor) {
+    salvarHistorico(); estado.corCamisa = cor.dataset.cor
+    if (fotoAtual()) estado.fotos[vista] = null
+    persistir(); desenharCamisa(); montarPainelCamisa(); posicionarCanvas(); return
+  }
+  const acao = e.target.closest('[data-foto]')?.dataset.foto
+  if (acao === 'enviar' || acao === 'trocar') $('arquivoFoto').click()
+  if (acao === 'remover') { salvarHistorico(); estado.fotos[vista] = null; persistir(); montarPainelCamisa(); posicionarCanvas() }
+  if (acao === 'ia') abrirIa('mockup')
+})
+$('painelCamisa').addEventListener('input', e => {
+  const k = e.target.dataset.area
+  if (k) {
+    const f = fotoAtual(); f.area[k] = Number(e.target.value)
+    e.target.previousElementSibling.querySelector('.valor').textContent = Math.round(f.area[k])
+    persistir(); posicionarCanvas(); return
+  }
+  if (e.target.id === 'realismo') { realismo = e.target.checked; desenhar() }
+  if (e.target.id === 'mostrarGuia') posicionarCanvas()
+})
+
+function usarFotoMockup(src, l, a) {
+  salvarHistorico()
+  estado.fotos[vista] = { src, l, a, area: { x: l * 0.33, y: a * (vista === 'frente' ? 0.24 : 0.2), l: l * 0.34 } }
+  persistir(); montarPainelCamisa(); posicionarCanvas()
+  aviso('Foto usada como mockup. Ajuste a área de impressão no painel da direita.')
+}
+$('arquivoFoto').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return
+  const img = await lerImagem(f, 2400)
+  usarFotoMockup(img.src, img.l, img.a)
+  e.target.value = ''
+}
+
 function nomeCamada(c) { return c.tipo === 'texto' ? `“${String(c.texto).replace(/\n/g, ' ').slice(0, 22)}”` : c.nome }
 function montarCamadas() {
   const lista = [...camadas()].reverse()
@@ -695,7 +1005,7 @@ function montarCamadas() {
       <button data-acao="descer" title="Para trás">↓</button>
       <button data-acao="ver" title="Mostrar/ocultar">${c.oculta ? '◌' : '👁'}</button>
       <button data-acao="travar" title="Travar">${c.travada ? '🔒' : '🔓'}</button>
-    </div>`).join('') : '<p class="vazio">Nada nesta vista ainda. Use um modelo ou adicione um texto.</p>'
+    </div>`).join('') : '<p class="vazio">Nada nesta vista ainda. Use um modelo, a IA ou adicione um texto.</p>'
 }
 $('camadas').addEventListener('click', e => {
   const linha = e.target.closest('.camada'); if (!linha) return
@@ -836,10 +1146,21 @@ $('paleta').addEventListener('contextmenu', e => {
 })
 $('paleta').addEventListener('change', e => { if (e.target.id === 'novaCor') { salvarHistorico(); estado.marca.paleta.push(e.target.value); persistir(); montarMarca() } })
 
-function lerImagem(arquivo) {
+/** Lê um arquivo de imagem; com `maximo`, reduz o lado maior para caber (fotos de celular são enormes). */
+function lerImagem(arquivo, maximo = 0) {
   return new Promise((ok, erro) => {
     const leitor = new FileReader()
-    leitor.onload = () => { const img = new Image(); img.onload = () => ok({ src: leitor.result, l: img.naturalWidth, a: img.naturalHeight }); img.onerror = erro; img.src = leitor.result }
+    leitor.onload = () => {
+      const img = new Image()
+      img.onload = () => {
+        const k = maximo ? Math.min(1, maximo / Math.max(img.naturalWidth, img.naturalHeight)) : 1
+        if (k === 1) return ok({ src: leitor.result, l: img.naturalWidth, a: img.naturalHeight })
+        const t = document.createElement('canvas'); t.width = Math.round(img.naturalWidth * k); t.height = Math.round(img.naturalHeight * k)
+        t.getContext('2d').drawImage(img, 0, 0, t.width, t.height)
+        ok({ src: t.toDataURL('image/jpeg', 0.9), l: t.width, a: t.height })
+      }
+      img.onerror = erro; img.src = leitor.result
+    }
     leitor.onerror = erro
     leitor.readAsDataURL(arquivo)
   })
@@ -902,12 +1223,150 @@ $('modelos').addEventListener('click', e => {
   if (m.vista && m.vista !== vista) trocarVista(m.vista)
   salvarHistorico()
   const novas = m.criar(estado.marca)
-  // em camisa clara, a cor principal (clara) vira a escura da paleta
-  if (luminancia(estado.corCamisa) > 0.6) for (const c of novas) for (const k of ['cor', 'contornoCor', 'contorno2Cor']) if (c[k] === estado.marca.paleta[0]) c[k] = estado.marca.paleta[1]
+  if (luminancia(estado.corCamisa) > 0.6 && !fotoAtual()) for (const c of novas) for (const k of ['cor', 'contornoCor', 'contorno2Cor']) if (c[k] === estado.marca.paleta[0]) c[k] = estado.marca.paleta[1]
   camadas().push(...novas)
   selecionada = novas[novas.length - 1].id
   mudou(false)
   aviso(`Modelo “${m.nome}” adicionado. Edite os textos no painel da direita.`)
+})
+
+// ── gerar com IA (API de imagens da OpenAI) ─────────────────────────────
+const ia = { modo: 'estampa', refs: [], gerando: false }
+const EXPLICA = {
+  estampa: 'Uma arte isolada com fundo transparente, pronta para virar camada da estampa.',
+  mockup: 'Uma foto realista de camiseta lisa, para usar como mockup. Com uma foto sua de referência, ela recria a sua camiseta.',
+  livre: 'Gera exatamente o que você descrever, sem instruções extras.',
+}
+const lerChave = () => { try { return localStorage.getItem(CHAVE_OPENAI) || '' } catch { return '' } }
+
+function montarChave() {
+  const chave = lerChave()
+  $('blocoChave').innerHTML = chave
+    ? `<p class="nota">🔑 Chave da OpenAI salva neste navegador (…${escapar(chave.slice(-4))}). <a href="#" id="trocarChave" style="color:var(--destaque)">trocar</a></p>`
+    : `<label>Sua chave da API da OpenAI</label>
+       <div class="linha"><input type="password" id="campoChave" placeholder="sk-..." autocomplete="off"><button id="guardarChave" style="flex:0 0 auto">Salvar</button></div>
+       <p class="nota">Crie em platform.openai.com/api-keys. Fica só neste navegador: não vai para o projeto, para arquivos salvos nem para o GitHub.</p>`
+}
+$('blocoChave').addEventListener('click', e => {
+  if (e.target.id === 'trocarChave') { e.preventDefault(); try { localStorage.removeItem(CHAVE_OPENAI) } catch {}; montarChave() }
+  if (e.target.id === 'guardarChave') {
+    const v = $('campoChave').value.trim()
+    if (!v) return
+    try { localStorage.setItem(CHAVE_OPENAI, v) } catch {}
+    montarChave(); aviso('Chave salva neste navegador.')
+  }
+})
+
+function abrirIa(modo) {
+  if (modo) trocarModoIa(modo)
+  montarChave()
+  $('janelaIa').hidden = false
+  setTimeout(() => (lerChave() ? $('promptIa') : $('campoChave'))?.focus(), 30)
+}
+function fecharIa() { $('janelaIa').hidden = true }
+function trocarModoIa(modo) {
+  ia.modo = modo
+  for (const b of $('abasIa').children) b.classList.toggle('ativo', b.dataset.modo === modo)
+  $('explicaModo').textContent = EXPLICA[modo]
+  $('promptIa').placeholder = { estampa: 'Ex.: leão de juba em chamas, traço de tatuagem old school, duas cores', mockup: 'Ex.: pendurada num cabide de madeira, parede de concreto', livre: 'Descreva a imagem' }[modo]
+}
+$('abrirIa').onclick = () => abrirIa()
+$('fecharIa').onclick = fecharIa
+$('janelaIa').addEventListener('click', e => { if (e.target.id === 'janelaIa') fecharIa() })
+$('abasIa').addEventListener('click', e => { const b = e.target.closest('[data-modo]'); if (b) trocarModoIa(b.dataset.modo) })
+
+$('addRefs').onclick = () => $('arquivoRefs').click()
+$('arquivoRefs').onchange = e => {
+  for (const f of [...e.target.files].slice(0, 4 - ia.refs.length)) ia.refs.push({ arquivo: f, url: URL.createObjectURL(f) })
+  montarRefs(); e.target.value = ''
+}
+function montarRefs() {
+  $('refsIa').innerHTML = ia.refs.map((r, i) => `<figure><img src="${r.url}" alt=""><button data-tirar="${i}" title="Remover">✕</button></figure>`).join('')
+}
+$('refsIa').addEventListener('click', e => { const i = e.target.dataset.tirar; if (i === undefined) return; URL.revokeObjectURL(ia.refs[i].url); ia.refs.splice(Number(i), 1); montarRefs() })
+
+function nomeCor(hex) { return CORES_CAMISA.find(([, c]) => c === hex)?.[0].toLowerCase() ?? `na cor ${hex}` }
+
+function montarPrompt() {
+  const pedido = $('promptIa').value.trim()
+  const m = estado.marca
+  const kit = $('usarKitIa').checked ? ` Marca: ${m.nome}${m.frase ? ` (${m.frase})` : ''}. Paleta preferida: ${m.paleta.join(', ')}.` : ''
+  const refs = ia.refs.length ? ' Use as imagens enviadas como referência.' : ''
+  if (ia.modo === 'estampa') {
+    return `${pedido || 'Arte original da marca'}. Arte para estampa de camiseta de streetwear: ilustração isolada e centralizada, fundo transparente, contornos nítidos, cores chapadas e alto contraste, pronta para impressão. Sem camiseta, sem mockup, sem moldura e sem texto que não foi pedido.${kit}${refs}`
+  }
+  if (ia.modo === 'mockup') {
+    const cor = fotoAtual() ? 'lisa' : nomeCor(estado.corCamisa)
+    return `Foto de produto realista de uma camiseta de algodão ${cor}, sem estampa, ${vista === 'frente' ? 'de frente' : 'de costas'}, inteira e centralizada no quadro, estendida plana sobre fundo neutro de estúdio, luz suave difusa, tecido com dobras naturais e textura de malha visível, gola bem definida. ${pedido}${refs}`
+  }
+  return `${pedido}${kit}${refs}`
+}
+
+async function chamarOpenAI({ chave, modelo, prompt, tamanho, qualidade, fundo, n, refs }) {
+  const cabecalho = { Authorization: `Bearer ${chave}` }
+  let resposta
+  if (refs.length) {
+    const form = new FormData()
+    form.append('model', modelo); form.append('prompt', prompt); form.append('size', tamanho)
+    form.append('quality', qualidade); form.append('background', fundo); form.append('output_format', 'png'); form.append('n', String(n))
+    if (/^gpt-image-1(\.5)?$/.test(modelo)) form.append('input_fidelity', 'high')
+    for (const r of refs) form.append(refs.length > 1 ? 'image[]' : 'image', r.arquivo, r.arquivo.name)
+    resposta = await fetch('https://api.openai.com/v1/images/edits', { method: 'POST', headers: cabecalho, body: form })
+  } else {
+    resposta = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST', headers: { ...cabecalho, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelo, prompt, size: tamanho, quality: qualidade, background: fundo, output_format: 'png', n }),
+    })
+  }
+  const json = await resposta.json().catch(() => ({}))
+  if (!resposta.ok) {
+    const msg = json.error?.message || `erro HTTP ${resposta.status}`
+    const dica = resposta.status === 401 ? ' Confira a chave.' : resposta.status === 403 ? ' Esse modelo pode exigir verificar a organização na OpenAI; tente outro modelo.' : resposta.status === 429 ? ' Limite ou créditos da conta: confira o saldo em platform.openai.com.' : ''
+    throw new Error(msg + dica)
+  }
+  return (json.data ?? []).map(d => `data:image/png;base64,${d.b64_json}`)
+}
+
+$('gerarIa').onclick = async () => {
+  const chave = lerChave()
+  if (!chave) { $('erroIa').innerHTML = '<div class="erro">Salve sua chave da OpenAI primeiro.</div>'; return }
+  if (ia.gerando) return
+  if (!$('promptIa').value.trim() && !ia.refs.length && ia.modo !== 'mockup') { $('erroIa').innerHTML = '<div class="erro">Descreva o que você quer ou envie uma foto de referência.</div>'; return }
+  ia.gerando = true
+  $('gerarIa').disabled = true; $('erroIa').innerHTML = ''
+  const n = Number($('quantidadeIa').value)
+  $('resultadosIa').innerHTML = `<div class="carregando" style="grid-column:1/-1"><div><div class="giro"></div>Gerando ${n} imagem${n > 1 ? 'ns' : ''}… pode levar até um minuto.</div></div>`
+  try {
+    const urls = await chamarOpenAI({
+      chave, modelo: $('modeloIa').value, prompt: montarPrompt(), tamanho: $('tamanhoIa').value, qualidade: $('qualidadeIa').value,
+      fundo: ia.modo === 'estampa' ? 'transparent' : 'opaque', n, refs: ia.refs,
+    })
+    mostrarResultados(urls)
+  } catch (erro) {
+    $('resultadosIa').innerHTML = '<div class="carregando" style="grid-column:1/-1"><div>Nada gerado.</div></div>'
+    $('erroIa').innerHTML = `<div class="erro">${escapar(erro.message || erro)}</div>`
+  } finally {
+    ia.gerando = false; $('gerarIa').disabled = false
+  }
+}
+
+function mostrarResultados(urls) {
+  ia.resultados = urls
+  $('resultadosIa').innerHTML = urls.map((u, i) => `
+    <div class="resultado"><img src="${u}" alt="Imagem gerada ${i + 1}">
+      <div class="acoes">
+        <button data-usar="estampa" data-i="${i}">Usar na estampa</button>
+        <button data-usar="mockup" data-i="${i}">Usar como mockup</button>
+        <button data-usar="baixar" data-i="${i}" style="grid-column:1/-1">Baixar</button>
+      </div></div>`).join('')
+}
+$('resultadosIa').addEventListener('click', async e => {
+  const b = e.target.closest('[data-usar]'); if (!b) return
+  const src = ia.resultados[Number(b.dataset.i)]
+  const img = new Image(); img.src = src; await img.decode()
+  if (b.dataset.usar === 'estampa') { adicionar(novaImagem(src, img.naturalWidth, img.naturalHeight, { nome: 'Arte IA' })); fecharIa(); aviso('Arte da IA adicionada como camada.') }
+  if (b.dataset.usar === 'mockup') { usarFotoMockup(src, img.naturalWidth, img.naturalHeight); fecharIa() }
+  if (b.dataset.usar === 'baixar') baixar(await (await fetch(src)).blob(), `${(estado.marca.nome || 'ia').replace(/[^\w-]+/g, '_')}-ia-${Date.now()}.png`)
 })
 
 // ── botões do topo ──────────────────────────────────────────────────────
@@ -926,12 +1385,11 @@ $('arquivoImagem').onchange = async e => {
 $('desfazer').onclick = desfazer
 $('refazer').onclick = refazer
 $('novo').onclick = () => { if (!confirm('Começar um projeto novo? (o kit da marca é mantido)')) return; salvarHistorico(); estado.camadas = { frente: [], costas: [] }; selecionada = null; mudou(false) }
-$('mostrarGuia').onchange = () => posicionarCanvas()
 
 function trocarVista(v) {
   vista = v; selecionada = null
   $('vistaFrente').classList.toggle('ativo', v === 'frente'); $('vistaCostas').classList.toggle('ativo', v === 'costas')
-  desenharCamisa(); posicionarCanvas(); montarCamadas(); montarProps(); contarCores()
+  desenharCamisa(); montarPainelCamisa(); posicionarCanvas(); montarCamadas(); montarProps(); contarCores()
 }
 $('vistaFrente').onclick = () => trocarVista('frente')
 $('vistaCostas').onclick = () => trocarVista('costas')
@@ -946,7 +1404,7 @@ const nomeArquivo = sufixo => `${(estado.marca.nome || 'estampa').replace(/[^\w-
 
 function renderizarArte() {
   const c = document.createElement('canvas'); c.width = PW; c.height = PH
-  const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0)
+  const g = c.getContext('2d')
   desenharCamadas(g, camadas(), 1)
   return c
 }
@@ -956,23 +1414,43 @@ $('exportarArte').onclick = async () => {
   renderizarArte().toBlob(b => { baixar(b, nomeArquivo('impressao-3600x4800.png')); aviso('Arte baixada: PNG transparente 3600×4800 (30×40 cm a 300 dpi).') }, 'image/png')
 }
 
-$('exportarMockup').onclick = async () => {
+/** O mockup em alta: camisa (desenho ou foto) + arte assentada no tecido. */
+async function renderizarMockup() {
   await document.fonts.ready
-  const L = 2000, A = 2200, k = L / 1000
+  const f = fotoAtual()
+  let fundo, L, A, area
+  if (f) {
+    fundo = imagemDe(f.src); await fundo.decode().catch(() => {})
+    const k = Math.min(2400 / f.l, 2400 / f.a, 2)
+    L = Math.round(f.l * k); A = Math.round(f.a * k)
+    area = { x: f.area.x * k, y: f.area.y * k, l: f.area.l * k, a: f.area.l * 4 / 3 * k }
+  } else {
+    L = 2000; A = 2200
+    const k = L / 1000, a = AREA[vista]
+    fundo = await carregarSvg(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1100" width="${L}" height="${A}">${svgCamisa(estado.corCamisa, vista)}</svg>`)
+    area = { x: a.x * k, y: a.y * k, l: a.l * k, a: a.a * k }
+  }
   const c = document.createElement('canvas'); c.width = L; c.height = A
   const g = c.getContext('2d')
-  g.fillStyle = luminancia(estado.corCamisa) < 0.5 ? '#e9e7e2' : '#1a1a1d'; g.fillRect(0, 0, L, A)
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1100" width="${L}" height="${A}">${svgCamisa(estado.corCamisa, vista)}</svg>`
-  const img = new Image()
-  img.onload = () => {
-    g.drawImage(img, 0, 0, L, A)
-    const area = AREA[vista]
-    g.drawImage(renderizarArte(), area.x * k, area.y * k, area.l * k, area.a * k)
-    g.font = '600 34px Inter, sans-serif'; g.fillStyle = luminancia(estado.corCamisa) < 0.5 ? '#333' : '#aaa'; g.textAlign = 'center'
-    g.fillText(`${estado.marca.nome} · ${vista}`, L / 2, A - 40)
-    c.toBlob(b => { baixar(b, nomeArquivo('mockup.png')); aviso('Mockup baixado.') }, 'image/png')
+  if (!f) {
+    const grad = g.createRadialGradient(L / 2, A * 0.38, 0, L / 2, A * 0.38, L * 0.8)
+    const claro = luminancia(estado.corCamisa) < 0.5
+    grad.addColorStop(0, claro ? '#f3f1ec' : '#2a2a31'); grad.addColorStop(1, claro ? '#cfcac0' : '#111114')
+    g.fillStyle = grad; g.fillRect(0, 0, L, A)
   }
-  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+  g.drawImage(fundo, 0, 0, L, A)
+  const arte = document.createElement('canvas'); arte.width = Math.round(area.l); arte.height = Math.round(area.a)
+  const ga = arte.getContext('2d'); const esc = arte.width / PW; ga.setTransform(esc, 0, 0, esc, 0, 0)
+  desenharCamadas(ga, camadas(), esc)
+  await new Promise(r => { prepararMapas(); const t = setInterval(() => { if (mapas.chave === chaveMapas()) { clearInterval(t); r() } }, 30); setTimeout(() => { clearInterval(t); r() }, 3000) })
+  aplicarTecido(ga)
+  g.drawImage(arte, area.x, area.y)
+  return c
+}
+
+$('exportarMockup').onclick = async () => {
+  const c = await renderizarMockup()
+  c.toBlob(b => { baixar(b, nomeArquivo('mockup.png')); aviso('Mockup baixado.') }, 'image/png')
 }
 
 $('salvar').onclick = () => { baixar(new Blob([JSON.stringify(estado)], { type: 'application/json' }), `${(estado.marca.nome || 'projeto').replace(/[^\w-]+/g, '_')}-projeto.json`); aviso('Projeto salvo.') }
@@ -987,11 +1465,12 @@ $('arquivoProjeto').onchange = async e => {
 // ── início ──────────────────────────────────────────────────────────────
 window.addEventListener('resize', posicionarCanvas)
 document.fonts.ready.then(() => desenhar())
-desenharCamisa(); montarCoresCamisa(); montarMarca(); montarCamadas(); montarProps(); posicionarCanvas(); contarCores()
+trocarModoIa('estampa')
+desenharCamisa(); montarPainelCamisa(); montarMarca(); montarCamadas(); montarProps(); posicionarCanvas(); contarCores()
 if (!estado.camadas.frente.length && !estado.camadas.costas.length) {
   camadas().push(...MODELOS[0].criar(estado.marca)); persistir(); desenhar(); montarCamadas(); contarCores()
 }
-window.estudio = { get estado() { return estado }, MODELOS, EFEITOS, trocarVista, renderizarArte }
+window.estudio = { get estado() { return estado }, MODELOS, EFEITOS, trocarVista, renderizarArte, renderizarMockup, usarFotoMockup, mostrarResultados, chamarOpenAI, montarPrompt, ia }
 </script>
 </body>
 </html>
