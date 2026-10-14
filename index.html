@@ -108,6 +108,11 @@
   @keyframes girar { to { transform: rotate(360deg); } }
   .erro { color: #ffb3bb; background: rgba(255, 77, 94, .1); border: 1px solid rgba(255, 77, 94, .35); border-radius: 8px; padding: 8px 10px; margin-top: 10px; font-size: 12px; }
   .fechar { float: right; }
+  .viaChat, .viaApi { margin-top: 14px; padding: 12px; border: 1px solid var(--borda); border-radius: 10px; background: #111115; }
+  .viaChat .titulo, .viaApi .titulo { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--destaque); }
+  .viaChat { border-color: rgba(16, 163, 127, .55); }
+  .viaChat .titulo { color: #34d399; }
+  main.soltando::after { content: 'Solte a imagem para adicionar à estampa'; position: absolute; inset: 12px; display: grid; place-items: center; border: 2px dashed var(--destaque); border-radius: 16px; background: rgba(0,0,0,.55); color: var(--destaque); font-weight: 800; font-size: 16px; pointer-events: none; z-index: 5; }
 </style>
 </head>
 <body>
@@ -136,6 +141,7 @@
 
   <aside>
     <button class="ia" id="abrirIa">✨ Gerar com IA</button>
+    <p class="nota">Copiou uma imagem do ChatGPT? Aperte <b>Ctrl+V</b> (ou <b>⌘V</b>) aqui. Também dá para arrastar uma imagem para a camiseta.</p>
 
     <h3>Adicionar</h3>
     <div class="grade2">
@@ -197,9 +203,7 @@
     <div class="lado">
       <button class="fechar" id="fecharIa" title="Fechar (Esc)">✕</button>
       <h2 id="tituloIa">✨ Gerar com IA</h2>
-      <p class="sub">Usa a API de imagens da OpenAI com a sua chave. Cada imagem é cobrada na sua conta da OpenAI.</p>
-
-      <div id="blocoChave"></div>
+      <p class="sub">Descreva a imagem e escolha: levar o pedido para o seu ChatGPT, ou gerar aqui pela API (cobrada por imagem na sua conta da OpenAI).</p>
 
       <div class="abas" id="abasIa">
         <button data-modo="estampa" class="ativo">Arte p/ estampa</button>
@@ -215,6 +219,17 @@
       <div class="linha"><button id="addRefs">＋ Enviar fotos</button></div>
       <div class="refs" id="refsIa"></div>
 
+      <label class="check" style="margin-top:12px"><input type="checkbox" id="usarKitIa" checked> Incluir o kit da marca (nome e paleta)</label>
+
+      <div class="viaChat">
+        <div class="titulo">Com a sua conta do ChatGPT (sem custo de API)</div>
+        <button id="copiarChat" style="width:100%;margin-top:8px;padding:10px">💬 Copiar pedido e abrir o ChatGPT</button>
+        <p class="nota">Cole o pedido no ChatGPT (anexe lá as fotos de referência, se usou). Quando a imagem sair, copie-a e aperte <b>Ctrl+V</b> (ou <b>⌘V</b>) aqui no editor.</p>
+      </div>
+
+      <div class="viaApi">
+        <div class="titulo">Gerar aqui, pela API da OpenAI</div>
+        <div id="blocoChave"></div>
       <div class="grade2">
         <div><label>Formato</label><select id="tamanhoIa">
           <option value="1024x1024">Quadrado</option><option value="1024x1536">Retrato</option><option value="1536x1024">Paisagem</option>
@@ -232,9 +247,9 @@
           <option value="gpt-image-1-mini">gpt-image-1-mini (barato)</option>
         </select></div>
       </div>
-      <label class="check" style="margin-top:12px"><input type="checkbox" id="usarKitIa" checked> Incluir o kit da marca (nome e paleta)</label>
-      <button class="primario" id="gerarIa" style="width:100%;margin-top:14px;padding:10px">Gerar</button>
-      <div id="erroIa"></div>
+        <button class="primario" id="gerarIa" style="width:100%;margin-top:10px;padding:10px">Gerar pela API</button>
+        <div id="erroIa"></div>
+      </div>
     </div>
     <div class="lado">
       <div id="resultadosIa"><div class="carregando" style="grid-column:1/-1"><div>As imagens geradas aparecem aqui.<br><br>Use uma na estampa ou como foto do mockup.</div></div></div>
@@ -1157,7 +1172,9 @@ function lerImagem(arquivo, maximo = 0) {
         if (k === 1) return ok({ src: leitor.result, l: img.naturalWidth, a: img.naturalHeight })
         const t = document.createElement('canvas'); t.width = Math.round(img.naturalWidth * k); t.height = Math.round(img.naturalHeight * k)
         t.getContext('2d').drawImage(img, 0, 0, t.width, t.height)
-        ok({ src: t.toDataURL('image/jpeg', 0.9), l: t.width, a: t.height })
+        // JPEG só quando a original já era JPEG: PNG e WebP podem ter transparência
+        const jpeg = arquivo.type === 'image/jpeg'
+        ok({ src: jpeg ? t.toDataURL('image/jpeg', 0.9) : t.toDataURL('image/png'), l: t.width, a: t.height })
       }
       img.onerror = erro; img.src = leitor.result
     }
@@ -1261,7 +1278,7 @@ function abrirIa(modo) {
   if (modo) trocarModoIa(modo)
   montarChave()
   $('janelaIa').hidden = false
-  setTimeout(() => (lerChave() ? $('promptIa') : $('campoChave'))?.focus(), 30)
+  setTimeout(() => $('promptIa').focus(), 30)
 }
 function fecharIa() { $('janelaIa').hidden = true }
 function trocarModoIa(modo) {
@@ -1349,6 +1366,63 @@ $('gerarIa').onclick = async () => {
     ia.gerando = false; $('gerarIa').disabled = false
   }
 }
+
+// ── pela conta do ChatGPT: leva o pedido pronto e recebe a imagem colada ──
+async function copiarTexto(texto) {
+  try { await navigator.clipboard.writeText(texto); return true } catch {}
+  const t = document.createElement('textarea')
+  t.value = texto; t.style.cssText = 'position:fixed;opacity:0'
+  document.body.appendChild(t); t.select()
+  const ok = document.execCommand('copy'); t.remove()
+  return ok
+}
+$('copiarChat').onclick = async () => {
+  if (!$('promptIa').value.trim() && !ia.refs.length && ia.modo !== 'mockup') return aviso('Descreva o que você quer primeiro.')
+  const extra = ia.modo === 'estampa' ? ' Entregue a imagem em PNG com fundo transparente.' : ''
+  const pedido = montarPrompt() + extra
+  const copiou = await copiarTexto(pedido)
+  window.open(`https://chatgpt.com/?q=${encodeURIComponent(pedido)}`, '_blank', 'noopener')
+  aviso(copiou
+    ? 'Pedido copiado. No ChatGPT, se ele não aparecer sozinho, cole com Ctrl+V. Depois copie a imagem e cole aqui.'
+    : 'Abra o ChatGPT e escreva o pedido. Depois copie a imagem e cole aqui.')
+}
+
+/** Uma imagem que chegou colada (Ctrl+V) ou arrastada: vira camada, ou foto do mockup se a IA está nesse modo. */
+async function receberImagem(arquivo, origem) {
+  const paraMockup = !$('janelaIa').hidden && ia.modo === 'mockup'
+  const img = await lerImagem(arquivo, paraMockup ? 2400 : 3000)
+  if (paraMockup) { usarFotoMockup(img.src, img.l, img.a); fecharIa(); return }
+  adicionar(novaImagem(img.src, img.l, img.a, { nome: origem === 'colada' ? 'Imagem colada' : arquivo.name.replace(/\.[^.]+$/, '').slice(0, 24) }))
+  if (!$('janelaIa').hidden) fecharIa()
+  aviso(await temFundo(img.src)
+    ? 'Imagem adicionada. Veio com fundo: use “Tirar fundo branco” ou “Cor única” no painel da direita.'
+    : 'Imagem adicionada à estampa.')
+}
+
+/** Verdadeiro se os quatro cantos da imagem são opacos (imagem com fundo, não recortada). */
+async function temFundo(src) {
+  const img = new Image(); img.src = src; await img.decode()
+  const t = document.createElement('canvas'); t.width = 32; t.height = 32
+  const g = t.getContext('2d'); g.drawImage(img, 0, 0, 32, 32)
+  return [[0, 0], [31, 0], [0, 31], [31, 31]].every(([x, y]) => g.getImageData(x, y, 1, 1).data[3] > 250)
+}
+
+document.addEventListener('paste', async e => {
+  const item = [...(e.clipboardData?.items ?? [])].find(i => i.kind === 'file' && i.type.startsWith('image/'))
+  if (!item) return
+  e.preventDefault()
+  await receberImagem(item.getAsFile(), 'colada')
+})
+
+const centro = $('centro')
+const temImagem = e => [...(e.dataTransfer?.items ?? [])].some(i => i.kind === 'file' && i.type.startsWith('image/'))
+centro.addEventListener('dragover', e => { if (!temImagem(e)) return; e.preventDefault(); centro.classList.add('soltando') })
+centro.addEventListener('dragleave', e => { if (!centro.contains(e.relatedTarget)) centro.classList.remove('soltando') })
+centro.addEventListener('drop', async e => {
+  if (!temImagem(e)) return
+  e.preventDefault(); centro.classList.remove('soltando')
+  for (const f of [...e.dataTransfer.files].filter(f => f.type.startsWith('image/')).slice(0, 4)) await receberImagem(f, 'arrastada')
+})
 
 function mostrarResultados(urls) {
   ia.resultados = urls
@@ -1470,7 +1544,7 @@ desenharCamisa(); montarPainelCamisa(); montarMarca(); montarCamadas(); montarPr
 if (!estado.camadas.frente.length && !estado.camadas.costas.length) {
   camadas().push(...MODELOS[0].criar(estado.marca)); persistir(); desenhar(); montarCamadas(); contarCores()
 }
-window.estudio = { get estado() { return estado }, MODELOS, EFEITOS, trocarVista, renderizarArte, renderizarMockup, usarFotoMockup, mostrarResultados, chamarOpenAI, montarPrompt, ia }
+window.estudio = { get estado() { return estado }, MODELOS, EFEITOS, trocarVista, renderizarArte, renderizarMockup, usarFotoMockup, mostrarResultados, chamarOpenAI, montarPrompt, receberImagem, ia }
 </script>
 </body>
 </html>

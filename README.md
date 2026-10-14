@@ -31,6 +31,19 @@ Google Fonts, então a primeira abertura precisa de internet.
 
 ## Gerar com IA
 
+### Com a sua conta do ChatGPT (sem custo de API)
+
+1. Clique em **✨ Gerar com IA**, escolha o tipo e descreva o que quer.
+2. **💬 Copiar pedido e abrir o ChatGPT**: o editor monta o pedido otimizado para estampa (com o kit da marca,
+   se marcado), copia e abre o ChatGPT. Se o texto não aparecer sozinho, cole com `Ctrl+V`.
+3. Quando a imagem sair, copie-a no ChatGPT e aperte `Ctrl+V` (`⌘V` no Mac) no editor. Ela vira camada da
+   estampa; com a janela no modo **Foto de mockup**, vira a foto do mockup.
+4. Se vier com fundo, use **Tirar fundo branco** ou **Cor única** no painel da direita.
+
+Também dá para arrastar qualquer imagem do computador para cima da camiseta.
+
+### Pela API da OpenAI (gera sem sair do editor)
+
 1. Crie uma chave em [platform.openai.com/api-keys](https://platform.openai.com/api-keys) e coloque créditos na conta.
 2. Clique em **✨ Gerar com IA**, cole a chave e salve. Ela fica **só no seu navegador** (localStorage): não vai
    para o projeto, para os arquivos salvos nem para o GitHub. Nunca coloque a chave no código.
