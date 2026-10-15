@@ -1,0 +1,12 @@
+.git
+.gitignore
+.assetsignore
+.wrangler
+.DS_Store
+node_modules
+worker.js
+wrangler.jsonc
+ferramentas
+*.command
+README.md
+biblioteca
