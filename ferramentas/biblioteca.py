@@ -82,9 +82,23 @@ def info_imagem(caminho):
     return int(valores.get("pixelWidth", 0)), int(valores.get("pixelHeight", 0)), valores.get("hasAlpha") == "yes"
 
 
-def tipo_de(nome, largura, altura, alfa):
+def transparencia(miniatura):
+    """Fração da imagem que é transparente de verdade (PNG com canal alfa pode ser todo opaco).
+    Precisa do Pillow; sem ele devolve None e vale o que o sips diz."""
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    with Image.open(miniatura) as im:
+        alfa = im.convert("RGBA").getchannel("A").histogram()
+        return sum(alfa[:20]) / max(1, sum(alfa))
+
+
+def tipo_de(nome, largura, altura, alfa, transparente=None):
     if any(p in nome.lower() for p in PALAVRAS_MOCKUP):
         return "mockup"
+    if transparente is not None:
+        alfa = transparente > 0.05
     if alfa:
         return "arte"
     # sem transparência: foto horizontal costuma ser mockup (duas camisetas lado a lado); o resto é arte com fundo
@@ -133,7 +147,7 @@ def main():
             "miniatura": "biblioteca/.miniaturas/" + assinatura + ".png",
             "nome": bonito(nome),
             "colecao": colecao_de(relativo.replace(os.sep, "/")),
-            "tipo": tipo_de(nome, largura, altura, alfa),
+            "tipo": tipo_de(nome, largura, altura, alfa, transparencia(miniatura)),
             "l": largura,
             "a": altura,
         })

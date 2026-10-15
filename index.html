@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>148 Estúdio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -181,6 +182,7 @@
     </div>
 
     <h3>Modelos 148</h3>
+    <button id="usar001" style="width:100%;margin-bottom:6px" title="Camiseta preta, logo 148 pequeno no centro do peito e as costas da linha 001">↺ Camisa 001 (padrão)</button>
     <div class="grade2" id="modelos"></div>
 
     <h3>Kit da marca</h3>
@@ -359,7 +361,7 @@ function estadoInicial() {
   return {
     versao: 2,
     corCamisa: '#141416',
-    marca: { nome: '148', frase: 'ORIGINAL DA RUA', ano: '2024', paleta: ['#ffffff', '#111113', '#e8ff3a', '#d7263d', '#ebe4d6'], logo: null },
+    marca: { nome: '148', frase: 'ORIGINAL DA RUA', ano: '2024', paleta: [...PALETA_148], logo: null },
     camadas: { frente: [], costas: [] },
     fotos: { frente: null, costas: null },
   }
@@ -372,7 +374,10 @@ function migrar(e) {
     for (const v of ['frente', 'costas']) for (const c of e.camadas[v] ?? []) { c.x += POSICOES[v].centro.x * U; c.y += POSICOES[v].centro.y * U }
     e.versao = 2
   }
-  for (const lista of Object.values(e.camadas)) for (const c of lista) if (c.tipo === 'texto') Object.assign(c, { ...padraoTexto(), ...c, modo: c.modo ?? (c.curva ? 'arco' : 'reto') })
+  for (const lista of Object.values(e.camadas)) for (const c of lista) {
+    if (c.tipo === 'texto') Object.assign(c, { ...padraoTexto(), ...c, modo: c.modo ?? (c.curva ? 'arco' : 'reto') })
+    if (c.tipo === 'imagem') c.tirarFundo ??= true
+  }
   return e
 }
 
@@ -418,9 +423,16 @@ function novaForma(forma, o = {}) {
 }
 function novaImagem(src, l, a, o = {}) {
   const k = Math.min(2600 / l, 2600 / a)
-  return { ...base(), tipo: 'imagem', nome: 'Imagem', src, srcOriginal: src, l: l * k, a: a * k, tinta: estado.marca.paleta[0], limiar: 0.85, ...o }
+  return { ...base(), tipo: 'imagem', nome: 'Imagem', src, srcOriginal: src, l: l * k, a: a * k, tinta: estado.marca.paleta[0], limiar: 0.85, tirarFundo: true, ...o }
 }
 function adicionar(c) { salvarHistorico(); camadas().push(c); selecionada = c.id; mudou(false) }
+/** Imagem nova na estampa, já sem o fundo liso e com a caixa justa no desenho. */
+async function adicionarImagem(src, l, a, o = {}) {
+  const c = novaImagem(src, l, a, o)
+  await prepararCamada(c)
+  adicionar(c)
+  return c
+}
 
 // ── texto: onde cada letra fica ─────────────────────────────────────────
 const medidor = document.createElement('canvas').getContext('2d')
@@ -566,13 +578,134 @@ function desenharForma(g, c) {
   if (c.contorno > 0) { g.lineWidth = c.contorno; g.strokeStyle = c.contornoCor; g.stroke() }
 }
 
+/** Espera a imagem carregar (pelo evento load: decode() pode ficar parado com a aba em segundo plano). */
+const carregada = img => img.complete ? Promise.resolve(img) : new Promise(ok => {
+  img.addEventListener('load', () => ok(img), { once: true }); img.addEventListener('error', () => ok(img), { once: true })
+})
 function imagemDe(src) {
   if (!imagens.has(src)) { const img = new Image(); img.onload = () => { mapas.chave = null; desenhar() }; img.src = src; imagens.set(src, img) }
   return imagens.get(src)
 }
 function desenharImagem(g, c) {
+  const fonte = fonteDe(c)
+  const w = fonte.naturalWidth || fonte.width, h = fonte.naturalHeight || fonte.height
+  if (!w || (fonte.complete === false)) return
+  const [x0, y0, x1, y1] = c.recorte ?? [0, 0, 1, 1]
+  g.drawImage(fonte, x0 * w, y0 * h, (x1 - x0) * w, (y1 - y0) * h, -c.l / 2, -c.a / 2, c.l, c.a)
+}
+
+// ── fundo liso: sai sozinho, para a arte não ficar dentro de um quadro ───
+const semFundo = new Map() // src → canvas sem o fundo (null: a imagem não tem fundo liso)
+
+/** A imagem que vai para a tela: sem o fundo liso, a não ser que a camada peça para manter. */
+function fonteDe(c) {
   const img = imagemDe(c.src)
-  if (img.complete && img.naturalWidth) g.drawImage(img, -c.l / 2, -c.a / 2, c.l, c.a)
+  if (!img.complete || !img.naturalWidth || c.tirarFundo === false) return img
+  if (!semFundo.has(c.src)) semFundo.set(c.src, removerFundo(img))
+  return semFundo.get(c.src) ?? img
+}
+
+/** Tira o fundo de cor lisa (o da borda da imagem): some o que encosta na borda com cor parecida, com borda
+ *  suave, e os miolos pequenos da mesma cor (dentro de letras). Devolve null se a borda não é lisa (foto) ou
+ *  se a imagem já é recortada. */
+function removerFundo(img) {
+  let L = img.naturalWidth, A = img.naturalHeight
+  const k = Math.min(1, Math.sqrt(10e6 / (L * A))) // imagens gigantes: processa numa cópia menor
+  L = Math.round(L * k); A = Math.round(A * k)
+  const t = document.createElement('canvas'); t.width = L; t.height = A
+  const g = t.getContext('2d', { willReadFrequently: true })
+  g.drawImage(img, 0, 0, L, A)
+  let dados
+  try { dados = g.getImageData(0, 0, L, A) } catch { return null }
+  const px = dados.data, n = L * A
+  const borda = []
+  const passo = Math.max(1, Math.floor(Math.max(L, A) / 300))
+  for (let x = 0; x < L; x += passo) borda.push(x, (A - 1) * L + x)
+  for (let y = 0; y < A; y += passo) borda.push(y * L, y * L + L - 1)
+  if (borda.filter(i => px[i * 4 + 3] < 250).length > borda.length * 0.3) return null
+  const mediana = canal => { const v = borda.map(i => px[i * 4 + canal]).sort((a, b) => a - b); return v[v.length >> 1] }
+  const fr = mediana(0), fg = mediana(1), fb = mediana(2)
+  const d = new Float32Array(n)
+  for (let i = 0; i < n; i++) {
+    const r = px[i * 4] - fr, gg = px[i * 4 + 1] - fg, b = px[i * 4 + 2] - fb
+    d[i] = Math.sqrt(r * r + gg * gg + b * b)
+  }
+  // basta metade da borda ser do fundo (a arte pode encostar nas laterais)
+  const dBorda = borda.map(i => d[i]).sort((a, b) => a - b)
+  if (dBorda[Math.floor(dBorda.length * 0.5)] > 30) return null
+  const lisos = dBorda.filter(v => v < 45)
+  const tol = Math.min(70, Math.max(26, lisos[Math.floor(lisos.length * 0.9)] * 1.6 + 14))
+  // 1) o fundo que encosta na borda
+  const fora = new Uint8Array(n), pilha = new Int32Array(n)
+  let topo = 0
+  const entra = i => { if (!fora[i] && d[i] < tol) { fora[i] = 1; pilha[topo++] = i } }
+  for (let x = 0; x < L; x++) { entra(x); entra((A - 1) * L + x) }
+  for (let y = 0; y < A; y++) { entra(y * L); entra(y * L + L - 1) }
+  while (topo) {
+    const i = pilha[--topo], x = i % L
+    if (x > 0) entra(i - 1)
+    if (x < L - 1) entra(i + 1)
+    if (i >= L) entra(i - L)
+    if (i < n - L) entra(i + L)
+  }
+  // 2) miolos pequenos da cor do fundo, presos dentro da arte
+  const quase = tol * 0.6, maxMiolo = n * 0.0015
+  const visto = new Uint8Array(n), grupo = new Int32Array(n)
+  for (let s = 0; s < n; s++) {
+    if (fora[s] || visto[s] || d[s] >= quase) continue
+    let tam = 0
+    visto[s] = 1; pilha[topo++] = s
+    while (topo) {
+      const i = pilha[--topo], x = i % L
+      grupo[tam++] = i
+      if (x > 0 && !visto[i - 1] && d[i - 1] < quase) { visto[i - 1] = 1; pilha[topo++] = i - 1 }
+      if (x < L - 1 && !visto[i + 1] && d[i + 1] < quase) { visto[i + 1] = 1; pilha[topo++] = i + 1 }
+      if (i >= L && !visto[i - L] && d[i - L] < quase) { visto[i - L] = 1; pilha[topo++] = i - L }
+      if (i < n - L && !visto[i + L] && d[i + L] < quase) { visto[i + L] = 1; pilha[topo++] = i + L }
+    }
+    if (tam < maxMiolo) for (let j = 0; j < tam; j++) fora[grupo[j]] = 1
+  }
+  // 3) apaga, com transição suave perto da arte
+  const meio = tol * 0.5
+  let apagados = 0
+  for (let i = 0; i < n; i++) {
+    if (!fora[i]) continue
+    px[i * 4 + 3] = Math.round(px[i * 4 + 3] * Math.max(0, Math.min(1, (d[i] - meio) / (tol - meio))))
+    apagados++
+  }
+  if (apagados < n * 0.02) return null
+  g.putImageData(dados, 0, 0)
+  return t
+}
+
+/** Retângulo (frações 0–1) onde há algo visível na imagem; null se ela é toda transparente. */
+function caixaVisivel(fonte, lado = 400) {
+  const w = fonte.naturalWidth || fonte.width, h = fonte.naturalHeight || fonte.height
+  const k = Math.min(1, lado / Math.max(w, h))
+  const t = document.createElement('canvas'); t.width = Math.max(1, Math.round(w * k)); t.height = Math.max(1, Math.round(h * k))
+  const g = t.getContext('2d', { willReadFrequently: true }); g.drawImage(fonte, 0, 0, t.width, t.height)
+  const d = g.getImageData(0, 0, t.width, t.height).data
+  let x0 = t.width, y0 = t.height, x1 = -1, y1 = -1
+  for (let y = 0; y < t.height; y++) for (let x = 0; x < t.width; x++) {
+    if (d[(y * t.width + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y }
+  }
+  if (x1 < 0) return null
+  return [Math.max(0, (x0 - 1) / t.width), Math.max(0, (y0 - 1) / t.height), Math.min(1, (x1 + 2) / t.width), Math.min(1, (y1 + 2) / t.height)]
+}
+
+/** Antes de entrar na estampa: carrega, tira o fundo liso e corta as sobras, para a caixa abraçar o desenho. */
+async function prepararCamada(c) {
+  const img = await carregada(imagemDe(c.src))
+  if (!img.naturalWidth) return c
+  let caixa = null
+  try { caixa = caixaVisivel(fonteDe(c)) } catch { return c }
+  if (!caixa || (caixa[2] - caixa[0] > 0.98 && caixa[3] - caixa[1] > 0.98)) return c
+  const maior = Math.max(c.l, c.a)
+  c.recorte = caixa
+  c.l *= caixa[2] - caixa[0]; c.a *= caixa[3] - caixa[1]
+  const k = maior / Math.max(c.l, c.a)
+  c.l *= k; c.a *= k
+  return c
 }
 
 /** Desenha as camadas no contexto g; T leva da camiseta (px de impressão) aos pixels de g: { s, tx, ty }. */
@@ -714,6 +847,18 @@ function recortarNaCamisa(g, pxPorUnidade) {
   g.restore()
 }
 
+/** No editor, o que passa da camiseta não some: aparece apagado, para você ver a arte inteira. */
+function mostrarForaDaCamisa(copia) {
+  const g = copia.getContext('2d')
+  g.save(); g.setTransform(T.kb, 0, 0, T.kb, 0, 0)
+  g.globalCompositeOperation = 'destination-out'
+  g.fill(new Path2D(contornoCamisa(vista)))
+  g.restore()
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 0.3
+  ctx.drawImage(copia, 0, 0)
+  ctx.restore()
+}
+
 // ── tela ────────────────────────────────────────────────────────────────
 let T = { s: 1, tx: 0, ty: 0 }
 
@@ -749,8 +894,11 @@ function desenhar() {
   ctx.setTransform(1, 0, 0, 1, 0, 0)
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   desenharCamadas(ctx, camadas(), T)
+  let copia = null
+  if (!fotoAtual()) { copia = document.createElement('canvas'); copia.width = canvas.width; copia.height = canvas.height; copia.getContext('2d').drawImage(canvas, 0, 0) }
   aplicarTecido(ctx)
   recortarNaCamisa(ctx, T.kb)
+  if (copia) mostrarForaDaCamisa(copia)
   ctx.setTransform(T.s, 0, 0, T.s, T.tx, T.ty)
   for (const gu of guias) {
     ctx.save(); ctx.strokeStyle = '#ff3ad2'; ctx.lineWidth = 1.5 / T.s
@@ -1023,42 +1171,38 @@ const EFEITOS = {
 }
 
 // ── imagem: preparo para serigrafia ─────────────────────────────────────
-function processarImagem(c, processo) {
-  if (processo === 'restaurar') { c.src = c.srcOriginal; c.processo = null; return Promise.resolve() }
-  return new Promise(ok => {
-    const img = new Image()
-    img.onload = () => {
-      const k = Math.min(1, 3000 / Math.max(img.naturalWidth, img.naturalHeight))
-      const t = document.createElement('canvas'); t.width = Math.round(img.naturalWidth * k); t.height = Math.round(img.naturalHeight * k)
-      const g = t.getContext('2d'); g.drawImage(img, 0, 0, t.width, t.height)
-      const dados = g.getImageData(0, 0, t.width, t.height), px = dados.data
-      const tinta = parseInt(c.tinta.slice(1), 16), tr = (tinta >> 16) & 255, tg = (tinta >> 8) & 255, tb = tinta & 255
-      const lim = c.limiar
-      for (let i = 0; i < px.length; i += 4) {
-        const r = px[i], gg = px[i + 1], b = px[i + 2]
-        const brilho = (0.299 * r + 0.587 * gg + 0.114 * b) / 255
-        if (processo === 'semFundo') {
-          const sat = (Math.max(r, gg, b) - Math.min(r, gg, b)) / 255
-          if (brilho > lim && sat < 0.15) px[i + 3] = Math.round(px[i + 3] * Math.max(0, (1 - brilho) / (1 - lim)))
-        } else if (processo === 'semFundoPreto') {
-          if (brilho < 1 - lim) px[i + 3] = Math.round(px[i + 3] * Math.max(0, brilho / (1 - lim)))
-        } else if (processo === 'corUnica') {
-          px[i + 3] = Math.round(px[i + 3] * Math.max(0, Math.min(1, (lim - brilho) / Math.max(0.05, lim) * 1.6)))
-          px[i] = tr; px[i + 1] = tg; px[i + 2] = tb
-        } else if (processo === 'contraste') {
-          const v = brilho < lim * 0.6 ? 0 : 255
-          px[i] = px[i + 1] = px[i + 2] = v
-        } else if (processo === 'inverter') {
-          px[i] = 255 - r; px[i + 1] = 255 - gg; px[i + 2] = 255 - b
-        }
-      }
-      g.putImageData(dados, 0, 0)
-      c.src = t.toDataURL('image/png')
-      c.processo = processo === 'inverter' || processo === 'contraste' ? c.processo : processo
-      ok()
+async function processarImagem(c, processo) {
+  if (processo === 'restaurar') { c.src = c.srcOriginal; c.processo = null; return }
+  await carregada(imagemDe(c.src))
+  const fonte = fonteDe(c) // já sem o fundo liso, quando for o caso
+  const w = fonte.naturalWidth || fonte.width, h = fonte.naturalHeight || fonte.height
+  const k = Math.min(1, 3000 / Math.max(w, h))
+  const t = document.createElement('canvas'); t.width = Math.round(w * k); t.height = Math.round(h * k)
+  const g = t.getContext('2d'); g.drawImage(fonte, 0, 0, t.width, t.height)
+  const dados = g.getImageData(0, 0, t.width, t.height), px = dados.data
+  const tinta = parseInt(c.tinta.slice(1), 16), tr = (tinta >> 16) & 255, tg = (tinta >> 8) & 255, tb = tinta & 255
+  const lim = c.limiar
+  for (let i = 0; i < px.length; i += 4) {
+    const r = px[i], gg = px[i + 1], b = px[i + 2]
+    const brilho = (0.299 * r + 0.587 * gg + 0.114 * b) / 255
+    if (processo === 'semFundo') {
+      const sat = (Math.max(r, gg, b) - Math.min(r, gg, b)) / 255
+      if (brilho > lim && sat < 0.15) px[i + 3] = Math.round(px[i + 3] * Math.max(0, (1 - brilho) / (1 - lim)))
+    } else if (processo === 'semFundoPreto') {
+      if (brilho < 1 - lim) px[i + 3] = Math.round(px[i + 3] * Math.max(0, brilho / (1 - lim)))
+    } else if (processo === 'corUnica') {
+      px[i + 3] = Math.round(px[i + 3] * Math.max(0, Math.min(1, (lim - brilho) / Math.max(0.05, lim) * 1.6)))
+      px[i] = tr; px[i + 1] = tg; px[i + 2] = tb
+    } else if (processo === 'contraste') {
+      const v = brilho < lim * 0.6 ? 0 : 255
+      px[i] = px[i + 1] = px[i + 2] = v
+    } else if (processo === 'inverter') {
+      px[i] = 255 - r; px[i + 1] = 255 - gg; px[i + 2] = 255 - b
     }
-    img.src = c.src
-  })
+  }
+  g.putImageData(dados, 0, 0)
+  c.src = t.toDataURL('image/png')
+  c.processo = processo === 'inverter' || processo === 'contraste' ? c.processo : processo
 }
 
 // ── painéis ─────────────────────────────────────────────────────────────
@@ -1070,7 +1214,7 @@ function montarPainelCamisa() {
   const f = fotoAtual()
   const cores = `<div class="cores">${CORES_CAMISA.map(([n, c]) => `<button class="cor ${!f && c === estado.corCamisa ? 'ativo' : ''}" style="background:${c}" title="${n}" data-cor="${c}"></button>`).join('')}</div>`
   const foto = f ? `
-    <p class="nota">Foto como mockup. Calibre a escala com os controles abaixo até o retângulo tracejado ficar do tamanho de uma área de 30×40 cm no peito da camiseta da foto. A estampa pode ir para qualquer lugar da foto.</p>
+    <p class="nota">Foto como mockup: a estampa vai para qualquer lugar da foto. Só para as medidas em cm baterem, ajuste a escala abaixo até o retângulo tracejado (que aparece enquanto você mexe) ficar do tamanho de 30×40 cm na camiseta da foto.</p>
     <label>Horizontal <span class="valor">${Math.round(f.area.x)}</span></label><input type="range" data-area="x" min="0" max="${f.l}" value="${f.area.x}">
     <label>Vertical <span class="valor">${Math.round(f.area.y)}</span></label><input type="range" data-area="y" min="0" max="${f.a}" value="${f.area.y}">
     <label>Escala (largura dos 30 cm) <span class="valor">${Math.round(f.area.l)}</span></label><input type="range" data-area="l" min="${Math.round(f.l * 0.08)}" max="${Math.round(f.l * 0.9)}" value="${f.area.l}">
@@ -1079,8 +1223,13 @@ function montarPainelCamisa() {
        <p class="nota">Ou escolha um mockup na Biblioteca 148.</p>`
   $('painelCamisa').innerHTML = cores + foto + `
     <label class="check" style="margin-top:10px"><input type="checkbox" id="realismo" ${realismo ? 'checked' : ''}> Estampa assentada no tecido (dobras e trama)</label>
-    <label class="check" style="margin-top:6px"><input type="checkbox" id="mostrarGuia" ${mostrarArea || f ? 'checked' : ''} ${f ? 'disabled' : ''}> Mostrar área padrão 30×40 (só referência)</label>`
-  if (f) { mostrarArea = true }
+    <label class="check" style="margin-top:6px"><input type="checkbox" id="mostrarGuia" ${mostrarArea ? 'checked' : ''}> Mostrar área padrão 30×40 (só referência)</label>`
+}
+/** A guia 30×40 aparece só enquanto você calibra a foto (ou se pedir para mostrar). */
+function piscarGuia() {
+  $('areaGuia').hidden = false
+  clearTimeout(piscarGuia.t)
+  piscarGuia.t = setTimeout(() => { $('areaGuia').hidden = !mostrarArea }, 1800)
 }
 $('painelCamisa').addEventListener('click', e => {
   const cor = e.target.closest('[data-cor]')
@@ -1099,7 +1248,7 @@ $('painelCamisa').addEventListener('input', e => {
   if (k) {
     const f = fotoAtual(); f.area[k] = Number(e.target.value)
     e.target.previousElementSibling.querySelector('.valor').textContent = Math.round(f.area[k])
-    mapas.chave = null; persistir(); posicionarCanvas(); return
+    mapas.chave = null; persistir(); posicionarCanvas(); piscarGuia(); return
   }
   if (e.target.id === 'realismo') { realismo = e.target.checked; desenhar() }
   if (e.target.id === 'mostrarGuia') { mostrarArea = e.target.checked; posicionarCanvas() }
@@ -1108,9 +1257,8 @@ $('painelCamisa').addEventListener('input', e => {
 function usarFotoMockup(src, l, a) {
   salvarHistorico()
   estado.fotos[vista] = { src, l, a, area: { x: l * 0.33, y: a * (vista === 'frente' ? 0.24 : 0.2), l: l * 0.34 } }
-  mostrarArea = true
-  persistir(); montarPainelCamisa(); posicionarCanvas()
-  aviso('Foto usada como mockup. Calibre a área 30×40 no painel da direita para as medidas ficarem certas.')
+  persistir(); montarPainelCamisa(); posicionarCanvas(); piscarGuia()
+  aviso('Foto usada como mockup. Se quiser medidas exatas em cm, ajuste a escala no painel da direita.')
 }
 $('arquivoFoto').onchange = async e => {
   const f = e.target.files[0]; if (!f) return
@@ -1209,6 +1357,7 @@ function montarProps() {
       ${c.forma === 'retangulo' ? controle('faixa', 'raioCanto', 'Cantos arredondados', { min: 0, max: 700 }) : ''}`)
   } else {
     especifico = secao('Preparar para impressão', `
+      ${controle('check', 'tirarFundo', 'Tirar o fundo liso automaticamente')}
       <div class="grade2" style="margin-top:8px">
         <button data-processo="semFundo">Tirar fundo branco</button>
         <button data-processo="semFundoPreto">Tirar fundo preto</button>
@@ -1312,9 +1461,12 @@ $('arquivoLogo').onchange = async e => {
   const f = e.target.files[0]; if (!f) return
   salvarHistorico(); estado.marca.logo = await lerImagem(f); persistir(); aviso('Logo salvo no kit da marca.'); e.target.value = ''
 }
-$('usarLogo').onclick = () => {
-  const logo = estado.marca.logo; if (!logo) return aviso('Envie o logo primeiro (ou escolha um na Biblioteca 148).')
-  adicionar(novaImagem(logo.src, logo.l, logo.a, { nome: 'Logo' }))
+$('usarLogo').onclick = async () => {
+  const logo = estado.marca.logo
+  if (logo) return adicionarImagem(logo.src, logo.l, logo.a, { nome: 'Logo' })
+  // sem logo no kit: o da linha 001, pequeno no centro do peito
+  const [c] = await camadas001('frente')
+  if (c) adicionar({ ...c, x: 500 * U, y: (vista === 'frente' ? PADRAO_001.frente.y : 150) * U })
 }
 
 // ── modelos ─────────────────────────────────────────────────────────────
@@ -1478,10 +1630,9 @@ $('gradeBib').addEventListener('click', async e => {
   const src = await srcDaBiblioteca(item)
   card.style.opacity = ''
   if (acao === 'estampa') {
-    const c = novaImagem(src, item.l, item.a, { nome: item.nome.slice(0, 28) })
-    adicionar(c)
+    const c = await adicionarImagem(src, item.l, item.a, { nome: item.nome.slice(0, 28) })
     fecharBib()
-    aviso(item.tipo === 'arteFundo' ? `“${item.nome}” adicionada. Ela tem fundo: use “Tirar fundo branco/preto” à direita.` : `“${item.nome}” adicionada. Arraste para qualquer lugar ou use os botões de posição.`)
+    aviso(semFundo.get(c.src) ? `“${item.nome}” adicionada sem o fundo liso. Arraste para qualquer lugar.` : `“${item.nome}” adicionada. Arraste para qualquer lugar ou use os botões de posição.`)
   } else if (acao === 'mockup') {
     usarFotoMockup(src, item.l, item.a); fecharBib()
   } else {
@@ -1489,6 +1640,39 @@ $('gradeBib').addEventListener('click', async e => {
     aviso(`“${item.nome}” agora é o logo da marca (botão “Usar logo”).`)
   }
 })
+
+// ── padrão 001: camiseta preta, logo 148 pequeno no centro do peito, "Louvem o nome do Senhor" nas costas ──
+// Igual ao mockup da linha 001 (pasta 001 - exclusive). As artes vêm da Biblioteca 148; sem ela (site),
+// o logo vira um "148" gótico.
+const PADRAO_001 = {
+  frente: { arte: 'Front', nome: 'Logo 148 · 001', altura: 6.5, y: 290 },
+  costas: { arte: 'Back-white', nome: 'Costas · 001', largura: 28, y: 340 },
+}
+async function camadas001(lado) {
+  const p = PADRAO_001[lado]
+  const item = (await carregarBiblioteca()) ? bib.indice.colecoes.flatMap(c => c.itens).find(i => i.colecao.startsWith('001') && i.nome === p.arte) : null
+  if (!item) {
+    return lado === 'frente' ? [novoTexto({ nome: p.nome, texto: '148', fonte: 'UnifrakturCook', peso: 700, tamanho: 330, cor: '#ece6da', x: 500 * U, y: p.y * U })] : []
+  }
+  const c = novaImagem(await srcDaBiblioteca(item), item.l, item.a, { nome: p.nome, x: 500 * U, y: p.y * U })
+  await prepararCamada(c)
+  const k = p.altura ? p.altura * PX_CM / c.a : p.largura * PX_CM / c.l
+  c.l *= k; c.a *= k
+  return [c]
+}
+async function aplicar001() {
+  const [frente, costas] = await Promise.all([camadas001('frente'), camadas001('costas')])
+  salvarHistorico()
+  estado.corCamisa = '#141416'
+  estado.fotos = { frente: null, costas: null }
+  estado.camadas = { frente, costas }
+  selecionada = null
+  posAlterarEstado()
+}
+/** O padrão antigo (o "Número gigante" que nunca foi mexido) dá lugar ao 001. */
+const ehPadraoAntigo = e => !e.camadas.costas.length && !e.fotos?.frente && e.camadas.frente.length === 3 &&
+  e.camadas.frente.every(c => c.tipo === 'texto') && e.camadas.frente[0].tamanho === 2300 && e.camadas.frente[0].texto === e.marca.nome
+$('usar001').onclick = async () => { await aplicar001(); aviso('Camisa 001 aplicada: logo pequeno no peito e as costas da linha 001. Desfazer volta ao anterior.') }
 
 // ── gerar com IA (API de imagens da OpenAI) ─────────────────────────────
 const ia = { modo: 'estampa', refs: [], gerando: false }
@@ -1635,19 +1819,9 @@ async function receberImagem(arquivo, origem) {
   const paraMockup = !$('janelaIa').hidden && ia.modo === 'mockup'
   const img = await lerImagem(arquivo, paraMockup ? 2400 : 3000)
   if (paraMockup) { usarFotoMockup(img.src, img.l, img.a); fecharIa(); return }
-  adicionar(novaImagem(img.src, img.l, img.a, { nome: origem === 'colada' ? 'Imagem colada' : arquivo.name.replace(/\.[^.]+$/, '').slice(0, 24) }))
+  const c = await adicionarImagem(img.src, img.l, img.a, { nome: origem === 'colada' ? 'Imagem colada' : arquivo.name.replace(/\.[^.]+$/, '').slice(0, 24) })
   if (!$('janelaIa').hidden) fecharIa()
-  aviso(await temFundo(img.src)
-    ? 'Imagem adicionada. Veio com fundo: use “Tirar fundo branco/preto” ou “Cor única” no painel da direita.'
-    : 'Imagem adicionada à estampa.')
-}
-
-/** Verdadeiro se os quatro cantos da imagem são opacos (imagem com fundo, não recortada). */
-async function temFundo(src) {
-  const img = new Image(); img.src = src; await img.decode()
-  const t = document.createElement('canvas'); t.width = 32; t.height = 32
-  const g = t.getContext('2d'); g.drawImage(img, 0, 0, 32, 32)
-  return [[0, 0], [31, 0], [0, 31], [31, 31]].every(([x, y]) => g.getImageData(x, y, 1, 1).data[3] > 250)
+  aviso(semFundo.get(c.src) ? 'Imagem adicionada, sem o fundo liso (desmarque “Tirar o fundo” à direita para voltar).' : 'Imagem adicionada à estampa.')
 }
 
 document.addEventListener('paste', async e => {
@@ -1680,8 +1854,8 @@ function mostrarResultados(urls) {
 $('resultadosIa').addEventListener('click', async e => {
   const b = e.target.closest('[data-usar]'); if (!b) return
   const src = ia.resultados[Number(b.dataset.i)]
-  const img = new Image(); img.src = src; await img.decode()
-  if (b.dataset.usar === 'estampa') { adicionar(novaImagem(src, img.naturalWidth, img.naturalHeight, { nome: 'Arte IA' })); fecharIa(); aviso('Arte da IA adicionada como camada.') }
+  const img = new Image(); img.src = src; await carregada(img)
+  if (b.dataset.usar === 'estampa') { await adicionarImagem(src, img.naturalWidth, img.naturalHeight, { nome: 'Arte IA' }); fecharIa(); aviso('Arte da IA adicionada como camada.') }
   if (b.dataset.usar === 'mockup') { usarFotoMockup(src, img.naturalWidth, img.naturalHeight); fecharIa() }
   if (b.dataset.usar === 'baixar') baixar(await (await fetch(src)).blob(), `${(estado.marca.nome || 'ia').replace(/[^\w-]+/g, '_')}-ia-${Date.now()}.png`)
 })
@@ -1696,12 +1870,12 @@ $('addImagem').onclick = () => $('arquivoImagem').click()
 $('arquivoImagem').onchange = async e => {
   const f = e.target.files[0]; if (!f) return
   const img = await lerImagem(f)
-  adicionar(novaImagem(img.src, img.l, img.a, { nome: f.name.replace(/\.[^.]+$/, '').slice(0, 24) }))
+  await adicionarImagem(img.src, img.l, img.a, { nome: f.name.replace(/\.[^.]+$/, '').slice(0, 24) })
   e.target.value = ''
 }
 $('desfazer').onclick = desfazer
 $('refazer').onclick = refazer
-$('novo').onclick = () => { if (!confirm('Começar um projeto novo? (o kit da marca é mantido)')) return; salvarHistorico(); estado.camadas = { frente: [], costas: [] }; selecionada = null; mudou(false) }
+$('novo').onclick = () => { if (confirm('Começar uma camisa nova no padrão 001? (dá para desfazer)')) aplicar001() }
 
 function trocarVista(v) {
   vista = v; selecionada = null
@@ -1798,7 +1972,7 @@ async function renderizarMockup() {
   const f = fotoAtual()
   let fundo, L, A
   if (f) {
-    fundo = imagemDe(f.src); await fundo.decode().catch(() => {})
+    fundo = await carregada(imagemDe(f.src))
     const k = Math.min(2400 / f.l, 2400 / f.a, 2)
     L = Math.round(f.l * k); A = Math.round(f.a * k)
   } else {
@@ -1845,10 +2019,10 @@ window.addEventListener('resize', posicionarCanvas)
 document.fonts.ready.then(() => desenhar())
 trocarModoIa('estampa')
 desenharCamisa(); montarPainelCamisa(); montarMarca(); montarCamadas(); montarProps(); posicionarCanvas(); contarCores()
-if (!estado.camadas.frente.length && !estado.camadas.costas.length) {
-  camadas().push(...MODELOS[0].criar(estado.marca)); persistir(); desenhar(); montarCamadas(); contarCores()
+if ((!estado.camadas.frente.length && !estado.camadas.costas.length) || ehPadraoAntigo(estado)) {
+  aplicar001().then(() => { historico.length = 0 })
 }
-window.estudio = { get estado() { return estado }, MODELOS, EFEITOS, POSICOES, U, trocarVista, renderizarArte, gruposDeImpressao, renderizarMockup, usarFotoMockup, mostrarResultados, chamarOpenAI, montarPrompt, receberImagem, abrirBib, posicionar, limites, ia, bib }
+window.estudio = { get estado() { return estado }, aplicar001, removerFundo, semFundo, MODELOS, EFEITOS, POSICOES, U, trocarVista, renderizarArte, gruposDeImpressao, renderizarMockup, usarFotoMockup, mostrarResultados, chamarOpenAI, montarPrompt, receberImagem, abrirBib, posicionar, limites, ia, bib }
 </script>
 </body>
 </html>
